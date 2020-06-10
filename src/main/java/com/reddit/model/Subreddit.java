@@ -19,6 +19,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @Entity
 @Builder
 public class Subreddit {
+	
     @Id
     @GeneratedValue(strategy = SEQUENCE)
     private Long id;

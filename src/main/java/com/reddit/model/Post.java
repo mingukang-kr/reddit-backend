@@ -19,6 +19,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Post {
+	
     @Id
     @GeneratedValue(strategy = SEQUENCE)
     private Long postId;

@@ -18,6 +18,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @Builder
 @Entity
 public class Comment {
+	
     @Id
     @GeneratedValue(strategy = SEQUENCE)
     private Long id;

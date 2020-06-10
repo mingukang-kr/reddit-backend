@@ -17,6 +17,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @Entity
 @Builder
 public class Vote {
+	
     @Id
     @GeneratedValue(strategy = SEQUENCE)
     private Long voteId;

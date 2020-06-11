@@ -8,7 +8,7 @@ import com.reddit.model.Comment;
 import com.reddit.model.Post;
 import com.reddit.model.User;
 
-public interface CommentRepository extends JpaRepository<Post, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findByPost(Post post);
 

@@ -39,7 +39,7 @@ public class MailService {
         } catch (MailException e) {
         	// 사용자 정의 에러를 만들어서 내부 기술 에러를 노출시키지 않도록 한다.
             throw new SpringRedditException("가입 인증 메일을 발송하던 중 오류가 발생했습니다. 받는 사용자는 "
-            		+ notificationEmail.getRecipient() + " 입니다. " + e);
+            		+ notificationEmail.getRecipient() + " 입니다. 상세 에러 : " + e);
         }
     }
 }

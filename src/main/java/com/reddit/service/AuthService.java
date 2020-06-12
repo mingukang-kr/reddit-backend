@@ -45,6 +45,7 @@ public class AuthService {
 		user.setEnabled(false); // 가입 인증을 완료하면 true로 전환
 
 		userRepository.save(user);
+		log.info("가입 회원 정보가 DB에 저장되었습니다.");
 
 		// 2. 회원 가입 완료를 위해 가입 인증 메일을 보냄
 		String token = generateVerificationToken(user);

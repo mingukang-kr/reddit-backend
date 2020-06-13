@@ -85,8 +85,8 @@ public class AuthService {
 
 	public AuthenticationResponse login(LoginRequest loginRequest) {
 		
-		Authentication authenticate = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		
 		SecurityContextHolder.getContext().setAuthentication(authenticate);
 		String authenticationToken = jwtProvider.generateToken(authenticate);
 		
@@ -107,8 +107,9 @@ public class AuthService {
 		
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new SpringRedditException("해당 id를 가진 사용자를 찾을 수 없습니다. " + username));
-		user.setEnabled(true);
+		user.setEnabled(true); // 가입 인증을 완료하면 true로 바꿔준다.
 
 		userRepository.save(user);
+		log.info("회원 가입이 최종적으로 완료되었습니다.");
 	}
 }

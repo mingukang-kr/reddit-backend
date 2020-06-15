@@ -30,9 +30,10 @@ public class JWTProvider {
 		try {
 			keyStore = KeyStore.getInstance("JKS");
 			InputStream resourceAsStream = getClass().getResourceAsStream("/springblog.jks");
-			keyStore.load(resourceAsStream, "secret".toCharArray());
+			keyStore.load(resourceAsStream, "123456".toCharArray()); // input 스트림과 비밀번호를 매개변수로 전달한다.
 		} catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-			throw new SpringRedditException("Exception occurred while loading keystore");
+			e.printStackTrace();
+			throw new SpringRedditException("keyStore를 불러오는 중 오류가 발생했습니다.");
 		}
 	}
 
@@ -46,7 +47,7 @@ public class JWTProvider {
 	private PrivateKey getPrivateKey() {
 		
 		try {
-			return (PrivateKey) keyStore.getKey("springblog", "secret".toCharArray());
+			return (PrivateKey)keyStore.getKey("springblog", "123456".toCharArray());
 		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
 			throw new SpringRedditException("Exception occured while retrieving public key from keystore");
 		}

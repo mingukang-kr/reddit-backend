@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthService {
 
+	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
 	private final VerificationTokenRepository verificationTokenRepository;
-	private final PasswordEncoder passwordEncoder;
 	// 인증 메일 전송을 위한 클래스
 	private final MailContentBuilder mailContentBuilder;
 	private final MailService mailService;
@@ -62,6 +63,16 @@ public class AuthService {
 		String message = mailContentBuilder
 				.build("가입 확인 인증 메일입니다. 링크를 클릭하시면 회원 가입이 완료됩니다. : " + ACTIVATION_EMAIL + "/" + token);
 		mailService.sendMail(new NotificationEmail("가입을 완료하시려면 클릭하세요.", user.getEmail(), message));
+	}
+	
+	@Transactional(readOnly = true)
+	User getCurrentUser() {
+		
+		org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder.
+				getContext().getAuthentication().getPrincipal();
+		
+		return userRepository.findByUsername(principal.getUsername())
+				.orElseThrow(() -> new UsernameNotFoundException(principal.getUsername() + "라는 사용자를 찾을 수 없습니다."));
 	}
 
 	// 인증 토큰 생성 메소드

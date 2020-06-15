@@ -34,8 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService {
 
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
 	private final VerificationTokenRepository verificationTokenRepository;
+	private final PasswordEncoder passwordEncoder;
 	// 인증 메일 전송을 위한 클래스
 	private final MailContentBuilder mailContentBuilder;
 	private final MailService mailService;

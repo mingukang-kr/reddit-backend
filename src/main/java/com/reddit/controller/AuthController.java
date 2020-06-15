@@ -29,7 +29,7 @@ public class AuthController {
 
 		authService.signup(registerRequest);
 
-		return new ResponseEntity(OK);
+		return new ResponseEntity<>("가입 인증 메일을 보냈습니다. 메일을 확인하여 회원 가입을 완료하여 주세요.", OK);
 	}
 	
     @PostMapping("/login")

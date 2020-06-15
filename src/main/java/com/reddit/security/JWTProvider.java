@@ -6,6 +6,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
@@ -17,7 +18,10 @@ import org.springframework.stereotype.Service;
 
 import com.reddit.exception.SpringRedditException;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+
+import static io.jsonwebtoken.Jwts.parser;
 
 @Service
 public class JWTProvider {
@@ -43,13 +47,40 @@ public class JWTProvider {
 		
 		return Jwts.builder().setSubject(principal.getUsername()).signWith(getPrivateKey()).compact();
 	}
+	
+    public boolean validateToken(String jwt) {
+    	
+    	parser().setSigningKey(getPublickey()).parseClaimsJws(jwt);
+        
+    	return true;
+    }
 
 	private PrivateKey getPrivateKey() {
 		
 		try {
 			return (PrivateKey)keyStore.getKey("springblog", "123456".toCharArray());
 		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-			throw new SpringRedditException("Exception occured while retrieving public key from keystore");
+			e.printStackTrace();			
+			throw new SpringRedditException("개인키를 가지고 오는 중 오류가 발생했습니다.");
 		}
 	}
+	
+    private PublicKey getPublickey() {
+    	
+    	try {
+            return keyStore.getCertificate("springblog").getPublicKey();
+        } catch (KeyStoreException e) {
+            throw new SpringRedditException("Exception occured while retrieving public key from keystore");
+        }
+    }
+
+    public String getUsernameFromJWT(String token) {
+    	
+    	Claims claims = parser()
+                .setSigningKey(getPublickey())
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
 }

@@ -49,6 +49,7 @@ public class SubredditService {
         return mapToDto(subreddit);
     }
 
+    // Subreddit -> SubredditDTO
     private SubredditDto mapToDto(Subreddit subreddit) {
     	
         return SubredditDto.builder().name(subreddit.getName())
@@ -57,9 +58,10 @@ public class SubredditService {
                 .build();
     }
 
+    // SubredditDTO -> Subreddit
     private Subreddit mapToSubreddit(SubredditDto subredditDto) {
     	
-        return Subreddit.builder().name("/r/" + subredditDto.getName())
+        return Subreddit.builder().name(subredditDto.getName())
                 .description(subredditDto.getDescription())
                 .user(authService.getCurrentUser())
                 .createdDate(now()).build();

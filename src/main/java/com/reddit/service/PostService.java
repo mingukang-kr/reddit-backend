@@ -1,7 +1,5 @@
 package com.reddit.service;
 
-import static java.time.Instant.now;
-
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,7 +9,6 @@ import com.reddit.dto.PostRequest;
 import com.reddit.dto.PostResponse;
 import com.reddit.exception.SubredditNotFoundException;
 import com.reddit.mapper.PostMapper;
-import com.reddit.model.Post;
 import com.reddit.model.Subreddit;
 import com.reddit.repository.PostRepository;
 import com.reddit.repository.SubredditRepository;

@@ -39,20 +39,8 @@ public class PostService {
         Subreddit subreddit = subredditRepository.findByName(postRequest.getSubredditName())
                 .orElseThrow(() -> new SubredditNotFoundException(postRequest.getSubredditName() + "라는 reddit을 찾을 수 없습니다."));
         
-        postRepository.save(mapToPost(postRequest, subreddit));
+        postRepository.save(postMapper.mapToPost(postRequest, subreddit));
     }
-
-	public Post mapToPost(PostRequest postRequest, Subreddit subreddit) {
-
-		return Post.builder().postId(authService.getCurrentUser().getUserId())
-				.postName(postRequest.getPostName())
-				.url(postRequest.getUrl())
-				.description(postRequest.getDescription())
-				.voteCount(0)
-				.user(authService.getCurrentUser())
-				.createdDate(now())
-				.subreddit(subreddit).build();
-	}
 
     @Transactional(readOnly = true)
     public List<PostResponse> getAllPosts() {

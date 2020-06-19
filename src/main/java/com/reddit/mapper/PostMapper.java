@@ -2,14 +2,17 @@ package com.reddit.mapper;
 
 import static com.reddit.model.VoteType.DOWNVOTE;
 import static com.reddit.model.VoteType.UPVOTE;
+import static java.time.Instant.now;
 
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.github.marlonlom.utilities.timeago.TimeAgo;
+import com.reddit.dto.PostRequest;
 import com.reddit.dto.PostResponse;
 import com.reddit.model.Post;
+import com.reddit.model.Subreddit;
 import com.reddit.model.Vote;
 import com.reddit.model.VoteType;
 import com.reddit.repository.CommentRepository;
@@ -43,6 +46,18 @@ public class PostMapper {
  
     	return postResponse;
     }
+    
+	public Post mapToPost(PostRequest postRequest, Subreddit subreddit) {
+
+		return Post.builder().postId(authService.getCurrentUser().getUserId())
+				.postName(postRequest.getPostName())
+				.url(postRequest.getUrl())
+				.description(postRequest.getDescription())
+				.voteCount(0)
+				.user(authService.getCurrentUser())
+				.createdDate(now())
+				.subreddit(subreddit).build();
+	}
 
     Integer commentCount(Post post) {
     	

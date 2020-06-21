@@ -3,6 +3,7 @@ package com.reddit.service;
 import static com.reddit.util.Constants.ACTIVATION_EMAIL;
 import static java.time.Instant.now;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.reddit.dto.AuthenticationResponse;
 import com.reddit.dto.LoginRequest;
+import com.reddit.dto.RefreshTokenRequest;
 import com.reddit.dto.RegisterRequest;
 import com.reddit.exception.SpringRedditException;
 import com.reddit.model.NotificationEmail;
@@ -44,7 +46,8 @@ public class AuthService {
 	// security 로그인을 위한 클래스
 	private final AuthenticationManager authenticationManager;
 	private final JWTProvider jwtProvider;
-
+	private final RefreshTokenService refreshTokenService;
+	
 	@Transactional
 	public void signup(RegisterRequest registerRequest) {
 
@@ -64,6 +67,21 @@ public class AuthService {
 		String message = mailContentBuilder
 				.build("가입 확인 인증 메일입니다. 링크를 클릭하시면 회원 가입이 완료됩니다. : " + ACTIVATION_EMAIL + "/" + token);
 		mailService.sendMail(new NotificationEmail("가입을 완료하시려면 클릭하세요.", user.getEmail(), message));
+	}
+	
+	public AuthenticationResponse login(LoginRequest loginRequest) {
+		
+		Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		
+		SecurityContextHolder.getContext().setAuthentication(authenticate);
+		String token = jwtProvider.generateToken(authenticate);
+		
+		return AuthenticationResponse.builder()
+				.authenticationToken(token)
+				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
+				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+				.username(loginRequest.getUsername())
+				.build();
 	}
 	
 	@Transactional(readOnly = true)
@@ -95,16 +113,6 @@ public class AuthService {
 		return passwordEncoder.encode(password);
 	}
 
-	public AuthenticationResponse login(LoginRequest loginRequest) {
-		
-		Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-		
-		SecurityContextHolder.getContext().setAuthentication(authenticate);
-		String authenticationToken = jwtProvider.generateToken(authenticate);
-		
-		return new AuthenticationResponse(authenticationToken, loginRequest.getUsername());
-	}
-
 	public void verifyAccount(String token) {
 
 		Optional<VerificationToken> verificationTokenOptional = verificationTokenRepository.findByToken(token);
@@ -130,5 +138,18 @@ public class AuthService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
         return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
+    }
+    
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+    	
+    	refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+    	String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+    	
+    	return AuthenticationResponse.builder()
+    			.authenticationToken(token)
+    			.refreshToken(refreshTokenRequest.getRefreshToken())
+    			.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+    			.username(refreshTokenRequest.getUsername())
+    			.build();
     }
 }

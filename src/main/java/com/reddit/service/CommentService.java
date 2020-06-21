@@ -54,7 +54,7 @@ public class CommentService {
     public List<CommentsDto> getAllCommentsForPost(Long postId) {
     	
         Post post = postRepository.findById(postId)
-        		.orElseThrow(() -> new PostNotFoundException(postId.toString()));
+        		.orElseThrow(() -> new PostNotFoundException(postId.toString() + "이라는 포스트를 찾을 수 없습니다."));
         
         return commentRepository.findByPost(post)
                 .stream()
@@ -65,7 +65,7 @@ public class CommentService {
     public List<CommentsDto> getAllCommentsForUser(String userName) {
     	
         User user = userRepository.findByUsername(userName)
-                .orElseThrow(() -> new UsernameNotFoundException(userName));
+                .orElseThrow(() -> new UsernameNotFoundException(userName + "라는 이름의 사용자를 찾을 수 없습니다."));
         
         return commentRepository.findAllByUser(user)
                 .stream()

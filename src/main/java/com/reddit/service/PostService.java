@@ -34,8 +34,8 @@ public class PostService {
 
 	public void save(PostRequest postRequest) {
 
-		Subreddit subreddit = subredditRepository.findByName(postRequest.getSubredditName()).orElseThrow(
-				() -> new SubredditNotFoundException(postRequest.getSubredditName() + "라는 reddit을 찾을 수 없습니다."));
+		Subreddit subreddit = subredditRepository.findByName(postRequest.getSubredditName())
+				.orElseThrow(() -> new SubredditNotFoundException(postRequest.getSubredditName() + "라는 서브레딧을 찾을 수 없습니다."));
 
 		postRepository.save(postMapper.mapToPost(postRequest, subreddit));
 	}
@@ -62,7 +62,7 @@ public class PostService {
 	public List<PostResponse> getPostsBySubreddit(Long subredditId) {
 		
 		Subreddit subreddit = subredditRepository.findById(subredditId)
-				.orElseThrow(() -> new SubredditNotFoundException(subredditId.toString()));
+				.orElseThrow(() -> new SubredditNotFoundException(subredditId.toString() + "이라는 서브레딧을 찾을 수 없습니다."));
 		
 		List<Post> posts = postRepository.findAllBySubreddit(subreddit);
 		

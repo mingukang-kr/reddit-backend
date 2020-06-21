@@ -37,6 +37,7 @@ public class PostMapper {
     	postResponse.setPostName(post.getPostName());
     	postResponse.setUrl(post.getUrl());
     	postResponse.setDescription(post.getDescription());
+    	postResponse.setVoteCount(post.getVoteCount());
     	postResponse.setSubredditName(post.getSubreddit().getName());
     	postResponse.setUserName(post.getUser().getUsername());
     	postResponse.setCommentCount(commentCount(post));

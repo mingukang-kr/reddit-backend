@@ -29,12 +29,12 @@ public class VoteService {
     public void vote(VoteDto voteDto) {
     	
         Post post = postRepository.findById(voteDto.getPostId())
-                .orElseThrow(() -> new PostNotFoundException("Post Not Found with ID - " + voteDto.getPostId()));
+                .orElseThrow(() -> new PostNotFoundException(voteDto.getPostId() + "라는 포스트를 찾을 수 없습니다."));
         
         Optional<Vote> voteByPostAndUser = voteRepository.findTopByPostAndUserOrderByVoteIdDesc(post, authService.getCurrentUser());
         
         if (voteByPostAndUser.isPresent() && voteByPostAndUser.get().getVoteType().equals(voteDto.getVoteType())) {	
-            throw new SpringRedditException("You have already " + voteDto.getVoteType() + "'d for this post");
+            throw new SpringRedditException("이미 찬반 의견을 표시하셨습니다.");
         }
         
         if (UPVOTE.equals(voteDto.getVoteType())) {
@@ -44,6 +44,7 @@ public class VoteService {
         }
         
         voteRepository.save(mapToVote(voteDto, post));
+        
         postRepository.save(post);
     }
 

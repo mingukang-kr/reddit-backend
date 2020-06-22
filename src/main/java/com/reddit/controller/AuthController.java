@@ -22,7 +22,7 @@ import com.reddit.service.RefreshTokenService;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/mingunet")
+@RequestMapping("/api/auth")
 @AllArgsConstructor
 public class AuthController {
 

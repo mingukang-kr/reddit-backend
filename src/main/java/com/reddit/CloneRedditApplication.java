@@ -10,10 +10,10 @@ import com.reddit.config.SwaggerConfiguration;
 @SpringBootApplication
 @Import(SwaggerConfiguration.class)
 @EnableAsync
-public class SpringbootWebservicePrac1Application {
+public class CloneRedditApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringbootWebservicePrac1Application.class, args);
+		SpringApplication.run(CloneRedditApplication.class, args);
 	}
 
 }

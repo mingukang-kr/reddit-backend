@@ -15,5 +15,4 @@ public class CloneRedditApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CloneRedditApplication.class, args);
 	}
-
 }

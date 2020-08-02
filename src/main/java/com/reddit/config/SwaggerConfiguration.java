@@ -24,9 +24,9 @@ public class SwaggerConfiguration {
 
 	private ApiInfo getApiInfo() {
 		
-		return new ApiInfoBuilder().title("Reddit Clone API").version("1.0")
-				.description("API for Reddit Clone Application")
-				.contact(new Contact("Sai Upadhyayula", "http://programmingtechie.com", "xyz@email.com"))
-				.license("Apache License Version 2.0").build();
+		return new ApiInfoBuilder().title("REST API Docs").version("1.0")
+				.description("프로젝트 서버 API 연동 문서입니다.")
+				.contact(new Contact("Mingu Kang", "localhost", "mingukang1992@gmail.com"))
+				.license("mingukang").build();
 	}
 }

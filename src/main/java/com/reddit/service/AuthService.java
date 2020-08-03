@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import com.reddit.model.User;
 import com.reddit.model.VerificationToken;
 import com.reddit.repository.UserRepository;
 import com.reddit.repository.VerificationTokenRepository;
+import com.reddit.security.CustomUsernamePasswordAuthenticationFilter;
 import com.reddit.security.JWTProvider;
 
 import lombok.AllArgsConstructor;
@@ -43,10 +45,10 @@ public class AuthService {
 	private final MailContentBuilder mailContentBuilder;
 	private final MailService mailService;
 	// 토큰 인증 방식 로그인을 위한 클래스
-	private final AuthenticationManager authenticationManager;
 	private final VerificationTokenRepository verificationTokenRepository;
 	private final JWTProvider jwtProvider;
 	private final RefreshTokenService refreshTokenService;
+	private final CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter;
 	
 	@Transactional
 	public void signup(RegisterRequest registerRequest) {
@@ -70,7 +72,7 @@ public class AuthService {
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
 		
-		Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		Authentication authenticate = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
 		
 		SecurityContextHolder.getContext().setAuthentication(authenticate);
 		String token = jwtProvider.generateToken(authenticate);

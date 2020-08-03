@@ -43,7 +43,7 @@ public class JWTProvider {
 			keyStore.load(resourceAsStream, "123456".toCharArray()); // input 스트림과 비밀번호를 매개변수로 전달한다.
 		} catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
 			e.printStackTrace();
-			throw new SpringRedditException("keyStore를 불러오는 중 오류가 발생했습니다.");
+			throw new SpringRedditException("키 저장소를 불러오는 중 오류가 발생했습니다.");
 		}
 	}
 
@@ -51,8 +51,11 @@ public class JWTProvider {
 		
 		User principal = (User)authentication.getPrincipal(); // security의 userDetails 패키지의 User 클래스임에 주의
 		
-		return Jwts.builder().setSubject(principal.getUsername()).signWith(getPrivateKey())
-				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis))).compact();
+		return Jwts.builder()
+				.setSubject(principal.getUsername())
+				.signWith(getPrivateKey())
+				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
+				.compact();
 	}
 	
 	public String generateTokenWithUserName(String username) {
@@ -87,7 +90,7 @@ public class JWTProvider {
     	try {
             return keyStore.getCertificate("springblog").getPublicKey();
         } catch (KeyStoreException e) {
-            throw new SpringRedditException("Exception occured while retrieving public key from keystore");
+            throw new SpringRedditException("키 저장소에서 공개키를 가지고 오던 중 오류가 발생하였습니다.");
         }
     }
 

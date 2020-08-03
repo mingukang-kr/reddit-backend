@@ -12,7 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 	
-	private final PasswordEncoder passwordEncoder;
 	private final CustomUserDetailsService customUserDetailsService;
 
 	@Override
@@ -52,17 +51,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		if (!loadedUser.isAccountNonExpired()) {
 			throw new AccountExpiredException("User account has expired");
 		}
-		
-		/* 실질적인 인증 */ 
-		if (!passwordEncoder.matches(password, loadedUser.getPassword())) { 
+		// 실질적인 인증 -> DB의 유저 정보와 입력한 유저 정보가 일치하는지 비교한다.
+		if (!new BCryptPasswordEncoder().matches(password, loadedUser.getPassword())) { 
 			throw new BadCredentialsException("Password does not match stored value"); 
-		} 
-		/* checker */ 
+		}
 		if (!loadedUser.isCredentialsNonExpired()) { 
 			throw new CredentialsExpiredException("User credentials have expired"); 
 		}
 		
-		/* 인증 완료 */ 
+		// 인증 완료 
 		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(loadedUser, null, loadedUser.getAuthorities());
 		result.setDetails(authentication.getDetails());
 		return result;
@@ -73,5 +70,4 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

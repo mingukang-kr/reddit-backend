@@ -8,13 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +25,7 @@ import com.reddit.model.User;
 import com.reddit.model.VerificationToken;
 import com.reddit.repository.UserRepository;
 import com.reddit.repository.VerificationTokenRepository;
+import com.reddit.security.CustomAuthenticationProvider;
 import com.reddit.security.CustomUsernamePasswordAuthenticationFilter;
 import com.reddit.security.JWTProvider;
 
@@ -49,6 +47,7 @@ public class AuthService {
 	private final JWTProvider jwtProvider;
 	private final RefreshTokenService refreshTokenService;
 	private final CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter;
+	private final CustomAuthenticationProvider customAuthenticationProvider;
 	
 	@Transactional
 	public void signup(RegisterRequest registerRequest) {
@@ -72,11 +71,21 @@ public class AuthService {
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
 		
-		Authentication authenticate = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
+		// 1. 입력한 아이디와 비밀번호로 인증이 필요한 UsernamePasswordAuthenticationToken 토큰을 만듬
+		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
 		
-		SecurityContextHolder.getContext().setAuthentication(authenticate);
-		String token = jwtProvider.generateToken(authenticate);
+		/* 2. 1의 토큰을 AuthenticationManager을 직접 구현한 ProviderManager에서 
+		 * 모든 provider들을 다 통과하면 인증 성공 처리 후, Authentication 객체를 반환한다.
+		 */
+		Authentication authenticated = customAuthenticationProvider.authenticate(needToBeAuthenticated);
 		
+		// 3. 인증이 완료된 토큰을 keyStore에 만들어둔 인증서로 서명한다.
+		String token = jwtProvider.generateToken(authenticated);
+		
+		// 4. 인증 완료된 토큰을 SecurityContextHolder에 저장한다.
+		SecurityContextHolder.getContext().setAuthentication(authenticated);
+		
+		// 5. 직접 만든 인증 응답 객체에 각종 데이터(인증 토큰, Refresh 토큰 등..)을 바인딩한 뒤 반환한다.
 		return AuthenticationResponse.builder()
 				.authenticationToken(token)
 				.refreshToken(refreshTokenService.generateRefreshToken().getToken())

@@ -22,12 +22,13 @@ import com.reddit.dto.RegisterRequest;
 import com.reddit.exception.SpringRedditException;
 import com.reddit.model.NotificationEmail;
 import com.reddit.model.User;
+import com.reddit.model.User.Authority;
 import com.reddit.model.VerificationToken;
 import com.reddit.repository.UserRepository;
 import com.reddit.repository.VerificationTokenRepository;
 import com.reddit.security.CustomAuthenticationProvider;
 import com.reddit.security.CustomUsernamePasswordAuthenticationFilter;
-import com.reddit.security.JWTProvider;
+import com.reddit.security.JwtProvider;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class AuthService {
 	private final MailService mailService;
 	// 토큰 인증 방식 로그인을 위한 클래스
 	private final VerificationTokenRepository verificationTokenRepository;
-	private final JWTProvider jwtProvider;
+	private final JwtProvider jwtProvider;
 	private final RefreshTokenService refreshTokenService;
 	private final CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter;
 	private final CustomAuthenticationProvider customAuthenticationProvider;
@@ -56,7 +57,7 @@ public class AuthService {
 		User user = new User();
 		user.setUsername(registerRequest.getUsername());
 		user.setEmail(registerRequest.getEmail());
-		user.setPassword(encodePassword(registerRequest.getPassword()));
+		user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 		user.setCreated(now());
 		user.setEnabled(false); // 메일 인증을 통해 최종 회원 가입이 될 시에 true로 바꿔준다.
 		userRepository.save(user);
@@ -71,21 +72,20 @@ public class AuthService {
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
 		
-		// 1. 입력한 아이디와 비밀번호로 인증이 필요한 UsernamePasswordAuthenticationToken 토큰을 만듬
+		// 1. 입력한 아이디와 비밀번호로 인증이 필요한 UsernamePasswordAuthenticationToken 토큰을 만든다.
 		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
 		
-		/* 2. 1의 토큰을 AuthenticationManager을 직접 구현한 ProviderManager에서 
-		 * 모든 provider들을 다 통과하면 인증 성공 처리 후, Authentication 객체를 반환한다.
-		 */
+		/* 2. 1의 토큰을 AuthenticationManager을 직접 구현한 ProviderManager에서 모든 provider들을
+		 * 다 통과하면, 인증 성공 처리 후 Authentication 객체를 반환한다. */
 		Authentication authenticated = customAuthenticationProvider.authenticate(needToBeAuthenticated);
 		
-		// 3. 인증이 완료된 토큰을 keyStore에 만들어둔 인증서로 서명한다.
-		String token = jwtProvider.generateToken(authenticated);
-		
-		// 4. 인증 완료된 토큰을 SecurityContextHolder에 저장한다.
+		// 3. 인증 완료된 토큰을 Context -> ContextHolder에 저장한다.
 		SecurityContextHolder.getContext().setAuthentication(authenticated);
 		
-		// 5. 직접 만든 인증 응답 객체에 각종 데이터(인증 토큰, Refresh 토큰 등..)을 바인딩한 뒤 반환한다.
+		// 4. keyStore에 만들어둔 인증서로 인증 정보(Authentication)에 서명하여 인증 토큰을 만든다.
+		String token = jwtProvider.generateToken(authenticated);
+
+		// 5. 직접 만든 인증 응답 객체에 각종 데이터(인증 토큰, Refresh 토큰 등..)를 바인딩한 뒤 반환한다.
 		return AuthenticationResponse.builder()
 				.authenticationToken(token)
 				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
@@ -118,17 +118,13 @@ public class AuthService {
 		return token;
 	}
 
-	// 비밀번호 암호화 메소드
-	private String encodePassword(String password) {
-
-		return passwordEncoder.encode(password);
-	}
-
 	// 가입 확인 메일을 눌러서 돌아온 토큰이 유효한 토큰인지 검사하는 메소드
 	public void verifyAccount(String token) {
 
 		Optional<VerificationToken> verificationTokenOptional = verificationTokenRepository.findByToken(token);
-		verificationTokenOptional.orElseThrow(() -> new SpringRedditException("인증 정보가 올바르지 않습니다."));
+		verificationTokenOptional
+			.orElseThrow(() -> new SpringRedditException("인증 정보가 올바르지 않습니다."));
+		
 		fetchUserAndEnable(verificationTokenOptional.get());
 	}
 
@@ -136,13 +132,11 @@ public class AuthService {
 	@Transactional
 	private void fetchUserAndEnable(VerificationToken verificationToken) {
 
-		String username = verificationToken.getUser().getUsername();
-		
-		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("해당 id를 가진 사용자를 찾을 수 없습니다. " + username));
+		User user = verificationToken.getUser();
 		user.setEnabled(true); // 가입 인증을 완료하면 true로 바꿔준다.
+		user.setAuthority(Authority.ROLE_USER); // 처음 가입시 권한은 'ROLE_USER'이다.
 
-		userRepository.save(user);
+		userRepository.save(user); // 다시 새로 회원정보가 처음부터 저장되는 것이 아니라, enabled만 바뀌어서 DB에도 적용된다.
 		log.info("회원 가입이 최종적으로 완료되었습니다.");
 	}
 	

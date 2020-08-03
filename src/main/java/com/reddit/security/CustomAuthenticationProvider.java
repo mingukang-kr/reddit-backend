@@ -41,7 +41,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		if (loadedUser == null) {
 			throw new InternalAuthenticationServiceException("UserDetailsService returned null, which is an interface contract violation");
 		}
-		/* checker */ 
 		if (!loadedUser.isAccountNonLocked()) { 
 			throw new LockedException("User account is locked");
 		}

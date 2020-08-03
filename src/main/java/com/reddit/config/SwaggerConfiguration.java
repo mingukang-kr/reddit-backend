@@ -24,9 +24,9 @@ public class SwaggerConfiguration {
 
 	private ApiInfo getApiInfo() {
 		
-		return new ApiInfoBuilder().title("REST API Docs").version("1.0")
-				.description("프로젝트 서버 API 연동 문서입니다.")
-				.contact(new Contact("Mingu Kang", "localhost", "mingukang1992@gmail.com"))
-				.license("mingukang").build();
+		return new ApiInfoBuilder().title("커뮤니티 REST API Docs").version("1.0")
+				.description("커뮤니티 API 연동 문서입니다.")
+				.contact(new Contact("강민구", "localhost", "mingukang1992@gmail.com"))
+				.license("강민구").build();
 	}
 }

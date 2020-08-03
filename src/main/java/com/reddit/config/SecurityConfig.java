@@ -39,18 +39,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     			.cors().and()
     			.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/auth/**")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/subreddit")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/posts")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/posts/**")
-                .permitAll()
+                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/posts/**").hasRole("USER")
+                .antMatchers(HttpMethod.GET, "/api/subreddit").permitAll()
                 .antMatchers("/v2/api-docs", "/configuration/ui",
                 		"/swagger-resources/**", "/configuration/security",
-                		"/swagger-ui.html", "/webjars/**")
-                .permitAll()
+                		"/swagger-ui.html", "/webjars/**").permitAll()
                 .anyRequest()
                 .authenticated();
     	

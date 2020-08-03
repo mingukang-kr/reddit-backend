@@ -34,8 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         return new org.springframework.security.core.userdetails.User(
         		user.getUsername(), user.getPassword(),
-                user.isEnabled(), true, true, true, 
-                getAuthorities("USER"));
+                user.isEnabled(), true, true, true, getAuthorities("ROLE_USER")); // 모든 회원은 가입시 유저의 권한을 가지게 된다.
     }
     
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {

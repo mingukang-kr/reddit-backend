@@ -17,8 +17,10 @@ import com.reddit.dto.PostRequest;
 import com.reddit.dto.PostResponse;
 import com.reddit.service.PostService;
 
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 
+@Api(tags={"2. Posts API"})
 @RestController
 @RequestMapping("/api/posts")
 @AllArgsConstructor

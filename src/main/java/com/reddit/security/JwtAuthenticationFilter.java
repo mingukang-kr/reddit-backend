@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private JWTProvider jwtProvider;
+    private JwtProvider jwtProvider;
     private UserDetailsService userDetailsService;
 
     @Override

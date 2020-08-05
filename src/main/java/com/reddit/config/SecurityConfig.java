@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.reddit.security.CustomAuthenticationProvider;
 import com.reddit.security.JwtAuthenticationFilter;
+import com.reddit.security.oauth2.service.CustomOAuth2UserService;
 
 import lombok.AllArgsConstructor;
 
@@ -23,6 +24,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter; // jwt 인증 필터
     private final CustomAuthenticationProvider authProvider; // 시큐리티 자체 로그인 인증 필터
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
@@ -45,7 +47,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v2/api-docs", "/configuration/ui",
                 		"/swagger-resources/**", "/configuration/security",
                 		"/swagger-ui.html", "/webjars/**").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+                .and()
+                .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
     	
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }

@@ -12,15 +12,10 @@ import com.reddit.config.SwaggerConfiguration;
 
 @SpringBootApplication
 @Import(SwaggerConfiguration.class)
-@EnableConfigurationProperties(AppProperties.class)
 @EnableAsync
 public class CloneRedditApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CloneRedditApplication.class, args);
-	}
-	
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
 	}
 }

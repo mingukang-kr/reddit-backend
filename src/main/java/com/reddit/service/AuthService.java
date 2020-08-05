@@ -72,11 +72,11 @@ public class AuthService {
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
 		
-		// 1. 입력한 아이디와 비밀번호로 인증이 필요한 UsernamePasswordAuthenticationToken 토큰을 만든다.
+		/* 1. 직접 구현한 로그인 인증 필터로 입력한 아이디와 비밀번호가 들어간 토큰을 만든다. */
 		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
 		
-		/* 2. 1의 토큰을 AuthenticationManager을 직접 구현한 ProviderManager에서 모든 provider들을
-		 * 다 통과하면, 인증 성공 처리 후 Authentication 객체를 반환한다. */
+		/* 2. 직접 구현한 AuthenticationProvider에서 인증을 통과하면 Authentication을 구현한 객체를 반환한다.
+		 * AuthenticationManager -> (구현) ProviderManager -> 해당 토큰을 인증할 AuthencationProvider를 찾음 */
 		Authentication authenticated = customAuthenticationProvider.authenticate(needToBeAuthenticated);
 		
 		// 3. 인증 완료된 토큰을 Context -> ContextHolder에 저장한다.

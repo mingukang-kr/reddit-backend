@@ -12,6 +12,11 @@ public class CustomUsernamePasswordAuthenticationFilter {
 
 	public Authentication customAttemptAuthentication(LoginRequest req) throws AuthenticationException {
 		
-		return new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword());
+		String username = req.getUsername();
+		String password = req.getPassword();
+		
+		if (username == null || password == null) throw new NullPointerException("아이디나 비밀번호가 null입니다.");
+		
+		return new UsernamePasswordAuthenticationToken(username, password);
 	}
 }

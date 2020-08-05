@@ -58,12 +58,13 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 			throw new CredentialsExpiredException("User credentials have expired"); 
 		}
 		
-		// 인증 완료 
-		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(loadedUser, null, loadedUser.getAuthorities());
+		// 인증 완료
+		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(loadedUser, null, loadedUser.getAuthorities()); // 인증된 토큰에는 비밀번호는 웬만하면 null을 넣는다.
 		result.setDetails(authentication.getDetails());
 		return result;
 	}
 
+	// 인증을 맡을 provider를 구현한 것이므로 인증 가능 여부를 판단하는 supports()는 미구현.
 	@Override
 	public boolean supports(Class<?> authentication) {
 		// TODO Auto-generated method stub

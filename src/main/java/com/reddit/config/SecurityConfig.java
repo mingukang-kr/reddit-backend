@@ -1,7 +1,6 @@
 package com.reddit.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
@@ -22,8 +21,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomAuthenticationProvider authProvider;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter; // jwt 인증 필터
+    private final CustomAuthenticationProvider authProvider; // 시큐리티 자체 로그인 인증 필터
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
@@ -36,25 +35,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity httpSecurity) throws Exception {
     	
     	httpSecurity
-    			.cors().and()
-    			.csrf().disable()
+    		.cors().and()
+    		.csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/oauth2/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/posts/**").hasRole("USER")
                 .antMatchers(HttpMethod.GET, "/api/subreddit").permitAll()
                 .antMatchers("/v2/api-docs", "/configuration/ui",
                 		"/swagger-resources/**", "/configuration/security",
                 		"/swagger-ui.html", "/webjars/**").permitAll()
-                .anyRequest()
-                .authenticated();
+                .anyRequest().authenticated();
     	
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
     
+    // 커스텀한 AuthenticationProivder을 ProviderManager에게 등록한다.
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     	
     	auth.authenticationProvider(authProvider);
+//    	auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
+    	// 커스텀한 UserDetailsService를 넣는 경우는 builder가 스프링이 제공하는 'DaoAuthenticationProvider'를 AuthenticationProvider로 사용한다.
     }
     
     @Bean

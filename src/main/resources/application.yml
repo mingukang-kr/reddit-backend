@@ -1,0 +1,40 @@
+### Database Properties
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/reddit?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
+    username: root
+    password:
+    initialization-mode: ALWAYS
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+### Mail Properties
+  mail:
+    host: smtp.mailtrap.io
+    port: 25
+    username: a8d6266aacf5fe
+    password: 8f65600dbe39c2
+    protocol: smtp
+### JWT Properties
+app:
+  auth:
+    tokenSecret: c{p+'|-q6glC4d1-<Yb0
+    tokenExpirationMsec: 864000000
+  oauth2:
+    authorizedRedirectUris:
+      - http://localhost:4200/oauth2/redirect
+### Social login Properties
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+          client-id: 607426288000-p316pclq9a2mpltvau3fv09tjs3ah4j4.apps.googleusercontent.com
+          client-secret: OU-cn-p33vE5ppmZ_CqPhSbM
+          scope: profile, email
+  profiles:
+    include: oauth

@@ -19,16 +19,19 @@ spring:
     username: a8d6266aacf5fe
     password: 8f65600dbe39c2
     protocol: smtp
+### other config
+  main:
+    allow-bean-definition-overriding: true
 ### JWT Properties
 jwt:
   expiration:
     time: 900000
+
 ---
 ### Oauth properties
 spring:
   profiles:
     include: google
-    
   security:
     oauth2:
       client:
@@ -37,3 +40,10 @@ spring:
             client-id: 607426288000-p316pclq9a2mpltvau3fv09tjs3ah4j4.apps.googleusercontent.com
             client-secret: OU-cn-p33vE5ppmZ_CqPhSbM
             scope: profile, email
+---
+spring:
+  redis:
+    host: localhost
+    port: 6379
+  profiles:
+    active: local

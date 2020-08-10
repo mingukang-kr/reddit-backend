@@ -2,35 +2,47 @@ package com.reddit.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.reddit.model.User;
-import com.reddit.repository.RedisUserRepository;
-
-import lombok.extern.slf4j.Slf4j;
+import com.reddit.model.Point;
+import com.reddit.repository.PointRedisRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Slf4j
 public class RedisTest {
     
-    @Autowired
-    private RedisUserRepository redisUserRepository;
-    
+	@Autowired
+    private PointRedisRepository pointRedisRepository;
+
+    @After
+    public void tearDown() throws Exception {
+        pointRedisRepository.deleteAll();
+    }
+
     @Test
-    public void test_login() {
-    	
-    	User user = new User(1L, "mingu", "1234", "redis@email.com", Instant.now(), true, com.reddit.model.User.Authority.ROLE_ADMIN);
-    	redisUserRepository.save(user);
-    	
-        User loadedUser = redisUserRepository.findByUsername("mingu").get();
-        log.info(loadedUser.toString());
-        assertThat(loadedUser.getUsername()).isEqualTo("mingu");
+    public void 기본_등록_조회기능() {
+        //given
+        String id = "jojoldu";
+        LocalDateTime refreshTime = LocalDateTime.of(2018, 5, 26, 0, 0);
+        Point point = Point.builder()
+                .id(id)
+                .amount(1000L)
+                .refreshTime(refreshTime)
+                .build();
+
+        //when
+        pointRedisRepository.save(point);
+
+        //then
+        Point savedPoint = pointRedisRepository.findById(id).get();
+        assertThat(savedPoint.getAmount()).isEqualTo(1000L);
+        assertThat(savedPoint.getRefreshTime()).isEqualTo(refreshTime);
     }
 }

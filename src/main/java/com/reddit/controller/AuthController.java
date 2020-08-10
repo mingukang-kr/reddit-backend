@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import javax.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,16 +34,16 @@ public class AuthController {
 	private final RefreshTokenService refreshTokenService;
 
 	@ApiOperation(value = "회원 가입", notes = "회원 가입")
-	@PostMapping(value = "/signup", produces = "application/json;charset=UTF-8")
+	@PostMapping(value = "/signup", produces = "application/json; charset=UTF-8")
 	public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest) {
 
 		authService.signup(registerRequest);
 
-		return ResponseEntity.status(OK).body("가입 인증 메일을 보냈습니다. 메일을 확인하여 회원 가입을 완료하여 주세요.");
+		return ResponseEntity.ok().body("가입 인증 메일을 보냈습니다. 메일을 확인하여 회원 가입을 완료하여 주세요.");
 	}
 	
     @ApiOperation(value = "계정 인증", notes = "가입 확인 메일로 보낸 토큰을 통해서 회원 가입을 완료한다.")
-	@GetMapping("/accountVerification/{token}")
+	@GetMapping(value = "/accountVerification/{token}", produces = "application/json; charset=UTF-8")
 	public ResponseEntity<String> verifyAccount(@PathVariable String token) {
 		
 		authService.verifyAccount(token);
@@ -53,7 +54,7 @@ public class AuthController {
 	@ApiOperation(value = "로그인", notes = "로그인")
     @PostMapping("/login")
     public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
-    	
+		
         return authService.login(loginRequest);
     }
 	

@@ -44,7 +44,6 @@ public class VoteService {
         }
         
         voteRepository.save(mapToVote(voteDto, post));
-        
         postRepository.save(post);
     }
 

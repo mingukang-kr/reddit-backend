@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 
 import redis.embedded.RedisServer;
 
-@Configuration
+@Configuration // 해당 어노테이션이 붙은 클래스는 클래스 자체로도 bean으로 인식된다. 그래서 PostConstruct나 PreDestory 설정이 가능하다.
 @Profile("local")
 public class EmbeddedRedisConfig {
 

@@ -1,5 +1,7 @@
 ### Database Properties
 spring:
+  profiles:
+    active: google
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/reddit?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
@@ -26,12 +28,15 @@ spring:
 jwt:
   expiration:
     time: 900000
-
 ---
 ### Oauth properties
 spring:
-  profiles:
-    include: google
+  profiles: google
+  
+  redis:
+    host: localhost
+    port: 6379
+    
   security:
     oauth2:
       client:
@@ -40,10 +45,3 @@ spring:
             client-id: 607426288000-p316pclq9a2mpltvau3fv09tjs3ah4j4.apps.googleusercontent.com
             client-secret: OU-cn-p33vE5ppmZ_CqPhSbM
             scope: profile, email
----
-spring:
-  redis:
-    host: localhost
-    port: 6379
-  profiles:
-    active: local

@@ -1,6 +1,5 @@
 package com.reddit.model;
 
-import java.io.Serializable;
 import java.time.Instant;
 
 import javax.persistence.Column;
@@ -14,8 +13,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
-import org.springframework.data.redis.core.RedisHash;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,10 +21,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@RedisHash("user")
-public class User implements Serializable {
+public class User {
 
-    @org.springframework.data.annotation.Id
 	@Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long userId;

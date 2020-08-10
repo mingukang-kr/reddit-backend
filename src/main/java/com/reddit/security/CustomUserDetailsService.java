@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.reddit.model.CacheKey;
 import com.reddit.model.User;
 import com.reddit.repository.UserRepository;
 
@@ -26,6 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheKey.USER, key = "#username", unless = "#result == null")
     public UserDetails loadUserByUsername(String username) {
     	
     	Optional<User> userOptional = userRepository.findByUsername(username);

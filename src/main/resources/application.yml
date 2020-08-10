@@ -1,7 +1,7 @@
-### Database Properties
 spring:
   profiles:
     active: google
+### Database Properties
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/reddit?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
@@ -14,6 +14,10 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
+### Redis Properties
+  redis:
+    host: localhost
+    port: 6379
 ### Mail Properties
   mail:
     host: smtp.mailtrap.io
@@ -29,14 +33,9 @@ jwt:
   expiration:
     time: 900000
 ---
-### Oauth properties
+### OAuth2.0 Properties
 spring:
   profiles: google
-  
-  redis:
-    host: localhost
-    port: 6379
-    
   security:
     oauth2:
       client:

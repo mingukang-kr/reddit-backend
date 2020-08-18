@@ -88,11 +88,11 @@ public class AuthService {
 		
 	/* 2. JWT를 이용한 인증 시스템 */
 		// 1. Authentication 객체에 인증서로 서명하여 인증 토큰(엑세스 토큰)을 만든다.
-		String token = jwtProvider.generateToken(authenticated);
+		String accessToken = jwtProvider.generateToken(authenticated);
 
 		// 2. 응답 객체에 각종 데이터(Access 토큰, Refresh 토큰 등)를 넣은 뒤 반환한다.
 		return AuthenticationResponse.builder()
-				.authenticationToken(token)
+				.authenticationToken(accessToken)
 				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
 				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
 				.username(loginRequest.getUsername())

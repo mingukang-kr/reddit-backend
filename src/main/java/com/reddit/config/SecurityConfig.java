@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.reddit.security.CustomAuthenticationProvider;
-import com.reddit.security.jwt.JwtAuthenticationFilter;
+import com.reddit.security.jwt.CustomJwtAuthenticationFilter;
 import com.reddit.security.oauth2.service.CustomOAuth2UserService;
 
 import lombok.AllArgsConstructor;
@@ -22,8 +22,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter; // jwt 인증 필터
+    private final CustomJwtAuthenticationFilter jwtAuthenticationFilter; // jwt 인증 필터
     private final CustomAuthenticationProvider authProvider; // 시큐리티 자체 로그인 인증 필터
+    // 
     private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
@@ -37,8 +38,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity httpSecurity) throws Exception {
     	
     	httpSecurity
-    		.cors().and()
-    		.csrf().disable()
+    		.cors()
+    		.and()
+    			.csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/oauth2/**").permitAll()
@@ -48,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 		"/swagger-resources/**", "/configuration/security",
                 		"/swagger-ui.html", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
-                .and()
+            .and()
                 .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
     	
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

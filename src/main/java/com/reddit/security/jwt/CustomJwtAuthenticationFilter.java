@@ -20,7 +20,7 @@ import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private CustomAccessTokenProvider jwtProvider;
     private UserDetailsService userDetailsService;

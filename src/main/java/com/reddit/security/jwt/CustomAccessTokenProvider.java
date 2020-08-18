@@ -58,6 +58,7 @@ public class CustomAccessTokenProvider {
 				.compact();
 	}
 	
+	// Username으로 Access 토큰 생성
 	public String generateToken(String username) {
 	
 		return Jwts.builder()

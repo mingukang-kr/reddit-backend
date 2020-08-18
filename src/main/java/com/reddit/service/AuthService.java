@@ -28,7 +28,8 @@ import com.reddit.repository.UserRepository;
 import com.reddit.repository.VerificationTokenRepository;
 import com.reddit.security.CustomAuthenticationProvider;
 import com.reddit.security.CustomUsernamePasswordAuthenticationFilter;
-import com.reddit.security.JwtProvider;
+import com.reddit.security.jwt.CustomAccessTokenProvider;
+import com.reddit.security.jwt.CustomRefreshTokenProvider;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +46,8 @@ public class AuthService {
 	private final MailService mailService;
 	// 토큰 인증 방식 로그인을 위한 클래스
 	private final VerificationTokenRepository verificationTokenRepository;
-	private final JwtProvider jwtProvider;
-	private final RefreshTokenService refreshTokenService;
+	private final CustomAccessTokenProvider jwtProvider;
+	private final CustomRefreshTokenProvider refreshTokenService;
 	private final CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter;
 	private final CustomAuthenticationProvider customAuthenticationProvider;
 	
@@ -72,24 +73,28 @@ public class AuthService {
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
 		
-		/* 1. 직접 구현한 로그인 인증 필터로 입력한 아이디와 비밀번호가 들어간 토큰을 만든다. */
+	/* 1. 스프링 시큐리티 */
+		/* 1. 로그인 인증 필터로 입력한 아이디와 비밀번호가 들어간 토큰을 만든다. */
 		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
 		
-		/* 2. 직접 구현한 AuthenticationProvider에서 인증을 통과하면 Authentication을 구현한 객체를 반환한다.
-		 * AuthenticationManager -> (구현) ProviderManager -> 해당 토큰을 인증할 AuthencationProvider를 찾음 */
+		/* 2. AuthenticationProvider에서 인증을 진행하고, 인증이 완료되면 Authentication 객체를 반환한다.
+		 * ProviderManager -> 해당 토큰을 인증할 AuthencationProvider를 찾는다.
+		 * 직접 구현한 AuthenticationProvider에서 인증을 진행한다.
+		 * */
 		Authentication authenticated = customAuthenticationProvider.authenticate(needToBeAuthenticated);
 		
-		// 3. 인증 완료된 토큰을 Context -> ContextHolder에 저장한다.
+		// 3. 인증 완료된 Authentication 객체를 Security 컨텍스트에 저장한다.
 		SecurityContextHolder.getContext().setAuthentication(authenticated);
 		
-		// 4. keyStore에 만들어둔 인증서로 인증 정보(Authentication)에 서명하여 인증 토큰을 만든다.
+	/* 2. JWT를 이용한 인증 시스템 */
+		// 1. Authentication 객체에 인증서로 서명하여 인증 토큰(엑세스 토큰)을 만든다.
 		String token = jwtProvider.generateToken(authenticated);
 
-		// 5. 직접 만든 인증 응답 객체에 각종 데이터(인증 토큰, Refresh 토큰 등..)를 바인딩한 뒤 반환한다.
+		// 2. 응답 객체에 각종 데이터(Access 토큰, Refresh 토큰 등)를 넣은 뒤 반환한다.
 		return AuthenticationResponse.builder()
 				.authenticationToken(token)
-				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
 				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
 				.username(loginRequest.getUsername())
 				.build();
 	}
@@ -149,8 +154,15 @@ public class AuthService {
     
     public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
     	
+    	/*
+    	 * 만료된 엑세스 토큰도 기간은 만료되었지만 조작되지는 않았는지 검사해야한다.
+    	 * 리프레시 토큰만 검사하고 엑세스 토큰을 재발급하는게 아니다.
+    	 */
+    	
+    	// 클라이언트로부터 전달 받은 리프레시 토큰이 유효한지 확인한다.
     	refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
-    	String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+    	// 리프레시 토큰이 유효하다면 엑세스 토큰을 재발급한다.
+    	String token = jwtProvider.generateToken(refreshTokenRequest.getUsername());
     	
     	return AuthenticationResponse.builder()
     			.authenticationToken(token)

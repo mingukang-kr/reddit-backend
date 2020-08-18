@@ -1,4 +1,4 @@
-package com.reddit.security;
+package com.reddit.security.jwt;
 
 import static io.jsonwebtoken.Jwts.parser;
 
@@ -28,11 +28,11 @@ import io.jsonwebtoken.Jwts;
 import static java.util.Date.from;
 
 @Service
-public class JwtProvider {
+public class CustomAccessTokenProvider {
 	
 	private KeyStore keyStore;
 	@Value("${jwt.expiration.time}")
-	private Long jwtExpirationInMillis;
+	private Long accessTokenExpiration;
 
 	@PostConstruct
 	public void init() {
@@ -54,17 +54,17 @@ public class JwtProvider {
 		return Jwts.builder()
 				.setSubject(principal.getUsername())
 				.signWith(getPrivateKey())
-				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
+				.setExpiration(Date.from(Instant.now().plusMillis(accessTokenExpiration)))
 				.compact();
 	}
 	
-	public String generateTokenWithUserName(String username) {
+	public String generateToken(String username) {
 	
 		return Jwts.builder()
 				.setSubject(username)
 				.setIssuedAt(from(Instant.now()))
 				.signWith(getPrivateKey())
-				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
+				.setExpiration(Date.from(Instant.now().plusMillis(accessTokenExpiration)))
 				.compact();
 	}
 	
@@ -106,6 +106,6 @@ public class JwtProvider {
     
     public Long getJwtExpirationInMillis() {
     	
-    	return jwtExpirationInMillis;
+    	return accessTokenExpiration;
     }
 }

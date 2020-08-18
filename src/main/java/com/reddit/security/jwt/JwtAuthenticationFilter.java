@@ -1,4 +1,4 @@
-package com.reddit.security;
+package com.reddit.security.jwt;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private JwtProvider jwtProvider;
+    private CustomAccessTokenProvider jwtProvider;
     private UserDetailsService userDetailsService;
 
     // 로그인 후 서버 API를 요청할 때마다 JWT 인증 필터가 작동한다.
@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     	
         String jwt = getJwtFromRequest(request);
 
-        // 요청이 가진 jwt가 유효한지 검증한다.
+        // 요청이 가진 jwt가 유효한 경우
         if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
             String username = jwtProvider.getUsernameFromJWT(jwt);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -45,6 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } else {
         	/*
         	 * 요청의 jwt가 유효하지 않을 경우
+        	 * 클라이언트에게 '엑세스 토큰이 유효하지 않으니, 리프레시 토큰을 보내서 엑세스 토큰을 재발급 받아라.'
+        	 * 라고 전달을 해야하는데 그 로직을 어떻게 표현해야하나...
+        	 * 단순히 다시 로그인을 하게 하면 리프레시 토큰을 쓰는 의미가 없어지고...
         	 */
         }
         

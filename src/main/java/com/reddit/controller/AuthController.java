@@ -4,7 +4,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import javax.validation.Valid;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,8 +16,8 @@ import com.reddit.dto.AuthenticationResponse;
 import com.reddit.dto.LoginRequest;
 import com.reddit.dto.RefreshTokenRequest;
 import com.reddit.dto.RegisterRequest;
+import com.reddit.security.jwt.CustomRefreshTokenProvider;
 import com.reddit.service.AuthService;
-import com.reddit.service.RefreshTokenService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,9 +30,9 @@ import lombok.AllArgsConstructor;
 public class AuthController {
 
 	private final AuthService authService;
-	private final RefreshTokenService refreshTokenService;
+	private final CustomRefreshTokenProvider refreshTokenService;
 
-	@ApiOperation(value = "회원 가입", notes = "회원 가입")
+	@ApiOperation(value = "회원 가입", notes = "회원 가입을 신청한다.")
 	@PostMapping(value = "/signup", produces = "application/json; charset=UTF-8")
 	public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest) {
 
@@ -42,7 +41,7 @@ public class AuthController {
 		return ResponseEntity.ok().body("가입 인증 메일을 보냈습니다. 메일을 확인하여 회원 가입을 완료하여 주세요.");
 	}
 	
-    @ApiOperation(value = "계정 인증", notes = "가입 확인 메일로 보낸 토큰을 통해서 회원 가입을 완료한다.")
+    @ApiOperation(value = "가입 계정 인증", notes = "가입한 메일로 보낸 링크를 통해서 회원 가입을 완료한다.")
 	@GetMapping(value = "/accountVerification/{token}", produces = "application/json; charset=UTF-8")
 	public ResponseEntity<String> verifyAccount(@PathVariable String token) {
 		
@@ -58,7 +57,7 @@ public class AuthController {
         return authService.login(loginRequest);
     }
 	
-    @ApiOperation(value = "토큰 갱신", notes = "만료된 토큰을 갱신한다.")
+    @ApiOperation(value = "엑세스 토큰 갱신", notes = "만료된 엑세스 토큰을 갱신한다.")
 	@PostMapping("/refresh/token")
 	public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
 	
@@ -66,7 +65,7 @@ public class AuthController {
 	}
 	
     @ApiOperation(value = "로그아웃", notes = "로그아웃")
-	@PostMapping("/logout")
+	@PostMapping(value = "/logout", produces = "application/json; charset=UTF-8")
 	public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
 	
 		refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());

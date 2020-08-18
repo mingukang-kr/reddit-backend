@@ -1,4 +1,4 @@
-package com.reddit.service;
+package com.reddit.security.jwt;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -15,20 +15,20 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 @Transactional
-public class RefreshTokenService {
+public class CustomRefreshTokenProvider {
 	
 	private final RefreshTokenRepository refreshTokenRepository;
 
-	RefreshToken generateRefreshToken() {
+	public RefreshToken generateRefreshToken() {
 		
 		RefreshToken refreshToken = new RefreshToken();
 		refreshToken.setToken(UUID.randomUUID().toString());
-		refreshToken.setCreatedDate(Instant.now());
+		refreshToken.setCreatedDate(Instant.now().plusMillis(9000000)); // 리프레시 토큰의 유효 기간은 엑세스 토큰보다 훨씬 길게 한다.
 		
 		return refreshTokenRepository.save(refreshToken);
 	}
 
-	void validateRefreshToken(String token) {
+	public void validateRefreshToken(String token) {
 		
 		refreshTokenRepository.findByToken(token)
 			.orElseThrow(() -> new SpringRedditException("부적합한 Refresh Token입니다."));

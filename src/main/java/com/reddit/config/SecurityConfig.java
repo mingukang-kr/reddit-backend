@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.reddit.security.CustomAuthenticationProvider;
-import com.reddit.security.JwtAuthenticationFilter;
+import com.reddit.security.jwt.JwtAuthenticationFilter;
 import com.reddit.security.oauth2.service.CustomOAuth2UserService;
 
 import lombok.AllArgsConstructor;

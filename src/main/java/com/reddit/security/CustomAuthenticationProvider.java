@@ -24,17 +24,19 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 	private final CustomUserDetailsService customUserDetailsService;
 
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public Authentication authenticate(Authentication needToBeAuthenticated) throws AuthenticationException {
 		
-		if (authentication == null) {
+		// 인증이 필요한 Authentication 객체에 대한 유효성 검사를 하고, username과 password를 받아온다.
+		if (needToBeAuthenticated == null) {
 			throw new InternalAuthenticationServiceException("인증 정보가 null값입니다.");
 		} 
-		String username = authentication.getName();
+		String username = needToBeAuthenticated.getName();
 		
-		if (authentication.getCredentials() == null) {
+		if (needToBeAuthenticated.getCredentials() == null) {
 			throw new AuthenticationCredentialsNotFoundException("비밀 번호가 null값입니다.");
 		}
-		String password = authentication.getCredentials().toString();
+		String password = needToBeAuthenticated.getCredentials().toString();
+		
 		// DB에서 유저 정보를 불러온다.
 		UserDetails loadedUser = customUserDetailsService.loadUserByUsername(username);
 		
@@ -58,9 +60,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 			throw new CredentialsExpiredException("User credentials have expired"); 
 		}
 		
-		// 인증 완료
+		// 인증에 성공하면 토큰을 발행한다.
 		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(loadedUser, null, loadedUser.getAuthorities()); // 인증된 토큰에는 비밀번호는 웬만하면 null을 넣는다.
-		result.setDetails(authentication.getDetails());
+		result.setDetails(needToBeAuthenticated.getDetails());
 		return result;
 	}
 

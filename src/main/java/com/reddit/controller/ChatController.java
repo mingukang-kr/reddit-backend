@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.reddit.dto.SubredditDto;
 import com.reddit.service.SubredditService;
 
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 
+@Api(tags={"5. Chat API"})
 @RestController
 @RequestMapping("/api/subreddit")
 @AllArgsConstructor
-public class SubredditController {
+public class ChatController {
 
     private final SubredditService subredditService;
 

@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.reddit.dto.CommentsDto;
 import com.reddit.service.CommentService;
 
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Api(tags={"3. Comment API"})
 @RestController
 @RequestMapping("/api/comments")
 @AllArgsConstructor

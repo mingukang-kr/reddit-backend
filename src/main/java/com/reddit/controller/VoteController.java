@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.reddit.dto.VoteDto;
 import com.reddit.service.VoteService;
 
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 
+@Api(tags={"4. Vote API"})
 @RestController
 @RequestMapping("/api/votes")
 @AllArgsConstructor

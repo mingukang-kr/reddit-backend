@@ -28,14 +28,6 @@ spring:
 ### other config
   main:
     allow-bean-definition-overriding: true
-### JWT Properties
-jwt:
-  expiration:
-    time: 900000
----
-### OAuth2.0 Properties
-spring:
-  profiles: google
   security:
     oauth2:
       client:
@@ -44,3 +36,7 @@ spring:
             client-id: 607426288000-p316pclq9a2mpltvau3fv09tjs3ah4j4.apps.googleusercontent.com
             client-secret: OU-cn-p33vE5ppmZ_CqPhSbM
             scope: profile, email
+### JWT Properties
+jwt:
+  expiration:
+    time: 900000

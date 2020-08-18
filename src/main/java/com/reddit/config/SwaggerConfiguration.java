@@ -24,9 +24,9 @@ public class SwaggerConfiguration {
 
 	private ApiInfo getApiInfo() {
 		
-		return new ApiInfoBuilder().title("커뮤니티 REST API Docs").version("1.0")
-				.description("커뮤니티 API 연동 문서입니다.")
-				.contact(new Contact("강민구", "localhost", "mingukang1992@gmail.com"))
+		return new ApiInfoBuilder().title("meddit REST API Docs").version("1.0")
+				.description("meddit 프로젝트 API 문서입니다.")
+				.contact(new Contact("강민구", "https://www.meddit.ml", "mingukang1992@gmail.com"))
 				.license("강민구").build();
 	}
 }

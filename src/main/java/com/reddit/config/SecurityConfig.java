@@ -38,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity httpSecurity) throws Exception {
     	
     	httpSecurity
-    		.cors()
+    			.cors()
     		.and()
     			.csrf().disable()
                 .authorizeRequests()
@@ -51,7 +51,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 		"/swagger-ui.html", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
             .and()
-                .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
+                .oauth2Login()
+                .userInfoEndpoint()
+                	.userService(customOAuth2UserService);
     	
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }

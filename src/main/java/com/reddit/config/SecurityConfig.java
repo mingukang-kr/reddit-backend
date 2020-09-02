@@ -23,20 +23,17 @@ import lombok.AllArgsConstructor;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomJwtAuthenticationFilter jwtAuthenticationFilter; // jwt 인증 필터
-    private final CustomAuthenticationProvider authProvider; // 시큐리티 자체 로그인 인증 필터
-    // 
+    private final CustomAuthenticationProvider authProvider; // 커스텀 AuthenticationProvider
     private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-    	
+    public AuthenticationManager authenticationManagerBean() throws Exception {	
     	return super.authenticationManagerBean();
     }
 
     @Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
-    	
     	httpSecurity
     			.cors()
     		.and()
@@ -49,36 +46,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v2/api-docs", "/configuration/ui",
                 		"/swagger-resources/**", "/configuration/security",
                 		"/swagger-ui.html", "/webjars/**").permitAll()
-                .anyRequest().authenticated()
-            .and()
+                .anyRequest().authenticated() 
+            .and() // Oauth2 설정
                 .oauth2Login()
                 .userInfoEndpoint()
                 	.userService(customOAuth2UserService);
     	
+    	// jwt 인증 필터를 security form 인증 필터 앞에 설정한다.
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
     
-    // 커스텀한 AuthenticationProivder을 ProviderManager에게 등록한다.
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    	
+    	// 커스텀 AuthenticationProvider을 ProviderManager에 등록한다.
     	auth.authenticationProvider(authProvider);
-//    	auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
-    	// 커스텀한 UserDetailsService를 넣는 경우는 builder가 스프링이 제공하는 'DaoAuthenticationProvider'를 AuthenticationProvider로 사용한다.
     }
     
     @Bean
     PasswordEncoder passwordEncoder() {
-    	
         return new BCryptPasswordEncoder();
     }
-    
-    /* ## 스프링 자체의 DaoAuthenticationProvider 사용하는 설정
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-    	
-    	authenticationManagerBuilder.userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
-    */
 }

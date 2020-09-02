@@ -36,7 +36,6 @@ public class CustomAccessTokenProvider {
 
 	@PostConstruct
 	public void init() {
-		
 		try {
 			keyStore = KeyStore.getInstance("JKS");
 			InputStream resourceAsStream = getClass().getResourceAsStream("/springblog.jks");
@@ -48,7 +47,6 @@ public class CustomAccessTokenProvider {
 	}
 
 	public String generateToken(Authentication authentication) {
-		
 		User principal = (User)authentication.getPrincipal(); // security의 userDetails 패키지의 User 클래스임에 주의
 		
 		return Jwts.builder()
@@ -60,7 +58,6 @@ public class CustomAccessTokenProvider {
 	
 	// Username으로 Access 토큰 생성
 	public String generateToken(String username) {
-	
 		return Jwts.builder()
 				.setSubject(username)
 				.setIssuedAt(from(Instant.now()))
@@ -70,14 +67,11 @@ public class CustomAccessTokenProvider {
 	}
 	
     public boolean validateToken(String jwt) {
-    	
     	parser().setSigningKey(getPublickey()).parseClaimsJws(jwt);
-        
     	return true;
     }
 
 	private PrivateKey getPrivateKey() {
-		
 		try {
 			return (PrivateKey)keyStore.getKey("springblog", "123456".toCharArray());
 		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -87,7 +81,6 @@ public class CustomAccessTokenProvider {
 	}
 	
     private PublicKey getPublickey() {
-    	
     	try {
             return keyStore.getCertificate("springblog").getPublicKey();
         } catch (KeyStoreException e) {
@@ -96,7 +89,6 @@ public class CustomAccessTokenProvider {
     }
 
     public String getUsernameFromJWT(String token) {
-    	
     	Claims claims = parser()
                 .setSigningKey(getPublickey())
                 .parseClaimsJws(token)
@@ -106,7 +98,6 @@ public class CustomAccessTokenProvider {
     }
     
     public Long getJwtExpirationInMillis() {
-    	
     	return accessTokenExpiration;
     }
 }

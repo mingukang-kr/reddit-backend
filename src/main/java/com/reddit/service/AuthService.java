@@ -31,11 +31,11 @@ import com.reddit.security.CustomUsernamePasswordAuthenticationFilter;
 import com.reddit.security.jwt.CustomAccessTokenProvider;
 import com.reddit.security.jwt.CustomRefreshTokenProvider;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class AuthService {
 
@@ -53,7 +53,6 @@ public class AuthService {
 	
 	@Transactional
 	public void signup(RegisterRequest registerRequest) {
-
 		// 1. 가입 신청한 회원의 정보를 DB에 저장 (메일 인증이 안 된 상태이므로 최종 가입이 된 것은 아님)
 		User user = new User();
 		user.setUsername(registerRequest.getUsername());
@@ -72,10 +71,9 @@ public class AuthService {
 	}
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
-		
 	/* 1. 스프링 시큐리티 */
 		/* 1. 로그인 인증 필터로 입력한 아이디와 비밀번호가 들어간 토큰을 만든다. */
-		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.customAttemptAuthentication(loginRequest);
+		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.AttemptAuthentication(loginRequest);
 		
 		/* 2. AuthenticationProvider에서 인증을 진행하고, 인증이 완료되면 Authentication 객체를 반환한다.
 		 * ProviderManager -> 해당 토큰을 인증할 AuthencationProvider를 찾는다.
@@ -101,7 +99,6 @@ public class AuthService {
 	
 	@Transactional(readOnly = true)
 	public User getCurrentUser() {
-		
 		org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User)SecurityContextHolder.
 				getContext().getAuthentication().getPrincipal();
 		
@@ -111,9 +108,8 @@ public class AuthService {
 
 	// 인증 토큰 생성 메소드
 	private String generateVerificationToken(User user) {
-
 		String token = UUID.randomUUID().toString();
-
+		
 		VerificationToken verificationToken = new VerificationToken();
 		verificationToken.setToken(token);
 		verificationToken.setUser(user);
@@ -125,7 +121,6 @@ public class AuthService {
 
 	// 가입 확인 메일을 눌러서 돌아온 토큰이 유효한 토큰인지 검사하는 메소드
 	public void verifyAccount(String token) {
-
 		Optional<VerificationToken> verificationTokenOptional = verificationTokenRepository.findByToken(token);
 		verificationTokenOptional
 			.orElseThrow(() -> new SpringRedditException("인증 정보가 올바르지 않습니다."));
@@ -136,7 +131,6 @@ public class AuthService {
 	// 인증된 토큰으로부터 사용자 정보를 DB에서 불러오는 메소드
 	@Transactional
 	private void fetchUserAndEnable(VerificationToken verificationToken) {
-
 		User user = verificationToken.getUser();
 		user.setEnabled(true); // 가입 인증을 완료하면 true로 바꿔준다.
 		user.setAuthority(Authority.ROLE_USER); // 처음 가입시 권한은 'ROLE_USER'이다.
@@ -146,19 +140,16 @@ public class AuthService {
 	}
 	
     public boolean isLoggedIn() {
-    	
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
         return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
     }
     
     public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
-    	
     	/*
     	 * 만료된 엑세스 토큰도 기간은 만료되었지만 조작되지는 않았는지 검사해야한다.
     	 * 리프레시 토큰만 검사하고 엑세스 토큰을 재발급하는게 아니다.
     	 */
-    	
     	// 클라이언트로부터 전달 받은 리프레시 토큰이 유효한지 확인한다.
     	refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
     	// 리프레시 토큰이 유효하다면 엑세스 토큰을 재발급한다.

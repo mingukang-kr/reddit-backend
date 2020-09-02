@@ -10,12 +10,16 @@ import com.reddit.dto.LoginRequest;
 @Component
 public class CustomUsernamePasswordAuthenticationFilter {
 
-	public Authentication customAttemptAuthentication(LoginRequest req) throws AuthenticationException {
-		
+	public Authentication AttemptAuthentication(LoginRequest req) throws AuthenticationException {
 		String username = req.getUsername();
 		String password = req.getPassword();
 		
-		if (username == null || password == null) throw new NullPointerException("아이디나 비밀번호가 null입니다.");
+		if (username == null) {
+			throw new NullPointerException("id가 null입니다.");
+		}
+		if (password == null) {
+			throw new NullPointerException("password가 null입니다.");
+		}
 		
 		return new UsernamePasswordAuthenticationToken(username, password);
 	}

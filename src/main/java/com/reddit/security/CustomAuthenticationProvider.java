@@ -25,7 +25,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication needToBeAuthenticated) throws AuthenticationException {
-		
 		// 인증이 필요한 Authentication 객체에 대한 유효성 검사를 하고, username과 password를 받아온다.
 		if (needToBeAuthenticated == null) {
 			throw new InternalAuthenticationServiceException("인증 정보가 null값입니다.");
@@ -69,7 +68,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 	// 인증을 맡을 provider를 구현한 것이므로 인증 가능 여부를 판단하는 supports()는 미구현.
 	@Override
 	public boolean supports(Class<?> authentication) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

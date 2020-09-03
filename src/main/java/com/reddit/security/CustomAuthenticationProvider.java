@@ -25,7 +25,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication needToBeAuthenticated) throws AuthenticationException {
-		// 인증이 필요한 Authentication 객체에 대한 유효성 검사를 하고, username과 password를 받아온다.
+		// 인증이 필요한 Authentication 객체에 대한 유효성 검사를 if문들로 진행하고, username과 password를 받아온다.
 		if (needToBeAuthenticated == null) {
 			throw new InternalAuthenticationServiceException("인증 정보가 null값입니다.");
 		} 
@@ -51,7 +51,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		if (!loadedUser.isAccountNonExpired()) {
 			throw new AccountExpiredException("User account has expired");
 		}
-		// 실질적인 인증 -> DB의 유저 정보와 입력한 유저 정보가 일치하는지 비교한다.
 		if (!new BCryptPasswordEncoder().matches(password, loadedUser.getPassword())) { 
 			throw new BadCredentialsException("Password does not match stored value"); 
 		}

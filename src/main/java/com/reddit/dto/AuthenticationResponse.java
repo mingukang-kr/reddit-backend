@@ -2,6 +2,8 @@ package com.reddit.dto;
 
 import java.time.Instant;
 
+import com.reddit.model.RefreshToken;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +17,6 @@ public class AuthenticationResponse {
 	
     private String authenticationToken;
     private String username;
-    private String refreshToken;
+    private RefreshToken refreshToken;
     private Instant expiresAt;
 }

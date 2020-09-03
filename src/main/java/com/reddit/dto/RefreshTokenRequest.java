@@ -2,6 +2,8 @@ package com.reddit.dto;
 
 import javax.validation.constraints.NotBlank;
 
+import com.reddit.model.RefreshToken;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,6 @@ import lombok.NoArgsConstructor;
 public class RefreshTokenRequest {
 	
 	@NotBlank
-	private String refreshToken;
+	private RefreshToken refreshToken;
     private String username;
 }

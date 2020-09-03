@@ -47,7 +47,7 @@ public class AuthService {
 	// 토큰 인증 방식 로그인을 위한 클래스
 	private final VerificationTokenRepository verificationTokenRepository;
 	private final CustomAccessTokenProvider jwtProvider;
-	private final CustomRefreshTokenProvider refreshTokenService;
+	private final CustomRefreshTokenProvider refreshTokenProvider;
 	private final CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter;
 	private final CustomAuthenticationProvider customAuthenticationProvider;
 	
@@ -91,8 +91,8 @@ public class AuthService {
 		// 2. 응답 객체에 각종 데이터(Access 토큰, Refresh 토큰 등)를 넣은 뒤 반환한다.
 		return AuthenticationResponse.builder()
 				.authenticationToken(accessToken)
-				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
-				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
+				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis())) // Access
+				.refreshToken(refreshTokenProvider.generateRefreshToken())
 				.username(loginRequest.getUsername())
 				.build();
 	}
@@ -151,7 +151,7 @@ public class AuthService {
     	 * 리프레시 토큰만 검사하고 엑세스 토큰을 재발급하는게 아니다.
     	 */
     	// 클라이언트로부터 전달 받은 리프레시 토큰이 유효한지 확인한다.
-    	refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+    	refreshTokenProvider.validateRefreshToken(refreshTokenRequest.getRefreshToken());
     	// 리프레시 토큰이 유효하다면 엑세스 토큰을 재발급한다.
     	String token = jwtProvider.generateToken(refreshTokenRequest.getUsername());
     	

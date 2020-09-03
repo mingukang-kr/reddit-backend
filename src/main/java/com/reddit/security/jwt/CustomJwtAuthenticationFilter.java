@@ -17,9 +17,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private CustomAccessTokenProvider jwtProvider;
@@ -31,6 +33,7 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
     	
         String jwt = getJwtFromRequest(request);
+        log.info("jwt: {}", jwt);
 
         // 요청이 가진 jwt가 유효한 경우
         if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
@@ -48,6 +51,7 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
         	 * 클라이언트에게 '엑세스 토큰이 유효하지 않으니, 리프레시 토큰을 보내서 엑세스 토큰을 재발급 받아라.'
         	 * 라고 전달을 해야하는데 그 로직을 어떻게 표현해야하나...
         	 * 단순히 다시 로그인을 하게 하면 리프레시 토큰을 쓰는 의미가 없어지고...
+        	 * -> 은행 홈페이지처럼 엑세스 토큰 만료 기간을 정해서 만료 기간을 표시해주고, 버튼을 누르면(요청) 액세스 토큰을 재발급하자.
         	 */
         }
         

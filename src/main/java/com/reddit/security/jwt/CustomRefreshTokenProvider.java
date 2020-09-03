@@ -28,14 +28,14 @@ public class CustomRefreshTokenProvider {
 		return refreshTokenRepository.save(refreshToken);
 	}
 
-	public void validateRefreshToken(String token) {
+	public void validateRefreshToken(RefreshToken refreshToken) {
 		
-		refreshTokenRepository.findByToken(token)
+		refreshTokenRepository.findByToken(refreshToken.getToken())
 			.orElseThrow(() -> new SpringRedditException("부적합한 Refresh Token입니다."));
 	}
 
-	public void deleteRefreshToken(String token) {
+	public void deleteRefreshToken(RefreshToken refreshToken) {
 		
-		refreshTokenRepository.deleteByToken(token);
+		refreshTokenRepository.deleteByToken(refreshToken.getToken());
 	}
 }

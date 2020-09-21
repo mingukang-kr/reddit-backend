@@ -42,10 +42,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 3. DB에 회원 정보를 저장하고, 세션에 OAuth 유저 객체를 담는다.
         CustomOAuth2User user = saveOrUpdate(attributes);
         
-        /*
-         * JWT 인증 적용
-         */
-        String accessToken = accessTokenProvider.generateToken(userNameAttributeName);
+      // JWT 인증
+        String accessToken = accessTokenProvider.generateToken(user.getEmail());
 
         // 4. 유저의 권한, 속성, 키를 OAuth2User에 담아서 리턴한다.
         return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),

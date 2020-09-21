@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -36,24 +37,24 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("jwt: {}", jwt);
 
         // 요청이 가진 jwt가 유효한 경우
-        if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
-            String username = jwtProvider.getUsernameFromJWT(jwt);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
-                    null, userDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        try {
+			if (jwtProvider.validateToken(jwt)) {
+			    String username = jwtProvider.getUsernameFromJWT(jwt);
+			    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			    
+			    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
+			            null, userDetails.getAuthorities());
+			    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else {
-        	/*
-        	 * 요청의 jwt가 유효하지 않을 경우
-        	 * 클라이언트에게 '엑세스 토큰이 유효하지 않으니, 리프레시 토큰을 보내서 엑세스 토큰을 재발급 받아라.'
-        	 * 라고 전달을 해야하는데 그 로직을 어떻게 표현해야하나...
-        	 * 단순히 다시 로그인을 하게 하면 리프레시 토큰을 쓰는 의미가 없어지고...
-        	 * -> 은행 홈페이지처럼 엑세스 토큰 만료 기간을 정해서 만료 기간을 표시해주고, 버튼을 누르면(요청) 액세스 토큰을 재발급하자.
-        	 */
-        }
+			    SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
+		} catch (UsernameNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         filterChain.doFilter(request, response);
     }

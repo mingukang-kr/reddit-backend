@@ -92,7 +92,7 @@ public class AuthService {
 		return AuthenticationResponse.builder()
 				.authenticationToken(accessToken)
 				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis())) // Access
-				.refreshToken(refreshTokenProvider.generateRefreshToken())
+				.refreshToken(refreshTokenProvider.generateRefreshToken().getToken())
 				.username(loginRequest.getUsername())
 				.build();
 	}
@@ -157,8 +157,8 @@ public class AuthService {
     	
     	return AuthenticationResponse.builder()
     			.authenticationToken(token)
-    			.refreshToken(refreshTokenRequest.getRefreshToken())
     			.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+    			.refreshToken(refreshTokenRequest.getRefreshToken().getToken())
     			.username(refreshTokenRequest.getUsername())
     			.build();
     }

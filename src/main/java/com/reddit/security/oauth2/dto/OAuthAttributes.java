@@ -29,11 +29,10 @@ public class OAuthAttributes {
 	}
 
 	// 현재는 네이버와 구글만 등록되어있지만 다른 외부 서비스들도 여기서 추가하여 바꿔주면 됩니다.
-	public static OAuthAttributes from(String registrationId, String userNameAttributeName,
-			Map<String, Object> attributes) {
-
-		if ("naver".equals(registrationId)) { return fromNaver("id", attributes); }
-
+	public static OAuthAttributes from(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
+		if ("naver".equals(registrationId)) {
+			return fromNaver("id", attributes);
+		}
 		return fromGoogle(userNameAttributeName, attributes);
 	}
 

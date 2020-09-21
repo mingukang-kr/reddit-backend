@@ -1,6 +1,7 @@
 package com.reddit.security.jwt;
 
 import static io.jsonwebtoken.Jwts.parser;
+import static java.util.Date.from;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,10 +25,12 @@ import org.springframework.stereotype.Service;
 import com.reddit.exception.SpringRedditException;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import static java.util.Date.from;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class CustomAccessTokenProvider {
 	
 	private KeyStore keyStore;
@@ -66,8 +69,25 @@ public class CustomAccessTokenProvider {
 				.compact();
 	}
 	
-    public boolean validateToken(String jwt) {
-    	parser().setSigningKey(getPublickey()).parseClaimsJws(jwt);
+    public boolean validateToken(String jwt) throws Exception {
+    	Jws<Claims> claims = parser()
+    			.setSigningKey(getPublickey())
+    			.parseClaimsJws(jwt);
+    	log.info("claims : {}", claims.toString());
+    	
+    	// jwt 서명이 일치하는지 확인한다. (jwt 조작 여부)
+    	String sign = jwt.split("\\.")[2];
+    	if ( !claims.getSignature().equals(sign) ) {
+    		log.info("jwt 서명 불일치");
+    		throw new Exception("jwt 서명이 일치하지 않습니다.");
+    	}
+    	
+    	// jwt의 만료 시간이 다 되었는지 확인한다.
+    	if ( claims.getBody().getExpiration().before(Date.from(Instant.now())) ) {
+    		log.info("jwt 만료");
+    		return false;
+    	}
+    	
     	return true;
     }
 

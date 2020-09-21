@@ -20,7 +20,6 @@ public class CustomRefreshTokenProvider {
 	private final RefreshTokenRepository refreshTokenRepository;
 
 	public RefreshToken generateRefreshToken() {
-		
 		RefreshToken refreshToken = new RefreshToken();
 		refreshToken.setToken(UUID.randomUUID().toString());
 		refreshToken.setCreatedDate(Instant.now().plusMillis(9000000)); // 리프레시 토큰의 유효 기간은 엑세스 토큰보다 훨씬 길게 한다.
@@ -28,14 +27,12 @@ public class CustomRefreshTokenProvider {
 		return refreshTokenRepository.save(refreshToken);
 	}
 
-	public void validateRefreshToken(RefreshToken refreshToken) {
-		
+	public void validateRefreshToken(RefreshToken refreshToken) {		
 		refreshTokenRepository.findByToken(refreshToken.getToken())
 			.orElseThrow(() -> new SpringRedditException("부적합한 Refresh Token입니다."));
 	}
 
-	public void deleteRefreshToken(RefreshToken refreshToken) {
-		
+	public void deleteRefreshToken(RefreshToken refreshToken) {	
 		refreshTokenRepository.deleteByToken(refreshToken.getToken());
 	}
 }

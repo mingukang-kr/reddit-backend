@@ -18,7 +18,8 @@ import com.reddit.model.CacheKey;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@Configuration
+@EnableCaching
 public class RedisConfig {
 
     @Bean(name = "cacheManager")

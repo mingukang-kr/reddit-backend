@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheKey.USER, key = "#username", unless = "#result == null")
+    @Cacheable(value = CacheKey.USER, unless = "#result == null")
     public UserDetails loadUserByUsername(String username) {
     	
     	Optional<User> userOptional = userRepository.findByUsername(username);

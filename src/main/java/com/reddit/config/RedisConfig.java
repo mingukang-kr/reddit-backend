@@ -4,47 +4,54 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.CacheKeyPrefix;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.reddit.model.CacheKey;
 
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @EnableCaching
 public class RedisConfig {
+	
+    @Value("${spring.redis.host}")
+    private String redisHost;
 
-    @Bean(name = "cacheManager")
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    @Value("${spring.redis.port}")
+    private int redisPort;
 
-        RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
-                .disableCachingNullValues() // null 캐시 방지
-                .entryTtl(Duration.ofSeconds(CacheKey.DEFAULT_EXPIRE_SEC)) // 기본 캐시 지속 시간 설정
-                .computePrefixWith(CacheKeyPrefix.simple()) // key 앞에 :: 삽입 (name::key)
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())); // redis 캐시 데이터 저장방식을 StringSeriallizer로 지정
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(redisHost, redisPort);
+    }
 
-        // Cache key 별 지속 시간 설정
+	@Bean(name = "cacheManager")
+    public RedisCacheManager cacheManager() {
+        RedisCacheConfiguration configuration = RedisCacheConfiguration
+        		.defaultCacheConfig()
+        		.disableCachingNullValues() // null 캐시 방지
+//        		.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
+        
+        // cache-key 마다 지속 시간(TTL) 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        
-        cacheConfigurations.put(CacheKey.USER, RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(CacheKey.USER_EXPIRE_SEC)));
-        
-        cacheConfigurations.put(CacheKey.POST, RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(CacheKey.POST_EXPIRE_SEC)));
-        
-        cacheConfigurations.put(CacheKey.POSTS, RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(CacheKey.POST_EXPIRE_SEC)));
+        cacheConfigurations.put("user", RedisCacheConfiguration
+        		.defaultCacheConfig().entryTtl(Duration.ofSeconds(CacheKey.USER_EXPIRE_SEC)));   
+        cacheConfigurations.put("post", RedisCacheConfiguration
+        		.defaultCacheConfig().entryTtl(Duration.ofSeconds(CacheKey.POST_EXPIRE_SEC)));
 
         return RedisCacheManager.RedisCacheManagerBuilder
-        		.fromConnectionFactory(connectionFactory).cacheDefaults(configuration)
-                .withInitialCacheConfigurations(cacheConfigurations).build();
+        		.fromConnectionFactory(redisConnectionFactory())
+        		.cacheDefaults(configuration)
+                .withInitialCacheConfigurations(cacheConfigurations)
+                .build();
     }
 }

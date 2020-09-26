@@ -43,7 +43,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         CustomOAuth2User user = saveOrUpdate(attributes);
         
       // JWT 인증
-        String accessToken = accessTokenProvider.generateToken(user.getEmail());
+        // JWT 인증 처리를 위한 작업 필요
 
         // 4. 유저의 권한, 속성, 키를 OAuth2User에 담아서 리턴한다.
         return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),

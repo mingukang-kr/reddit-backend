@@ -37,4 +37,4 @@ spring:
 ### JWT Properties
 jwt:
   expiration:
-    time: 2000
+    time: 3600000

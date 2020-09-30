@@ -18,6 +18,7 @@ import java.time.Instant;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
@@ -25,14 +26,18 @@ import org.springframework.stereotype.Service;
 import com.reddit.exception.SpringRedditException;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class CustomAccessTokenProvider {
 	
+	// Key를 만들어 JKS에 저장 후 사용해보는 방식으로 구현.
 	private KeyStore keyStore;
 	@Value("${jwt.expiration.time}")
 	private Long accessTokenExpiration;
@@ -49,8 +54,9 @@ public class CustomAccessTokenProvider {
 		}
 	}
 
+	// Authentication 객체로 Access 토큰 생성
 	public String generateToken(Authentication authentication) {
-		User principal = (User)authentication.getPrincipal(); // security의 userDetails 패키지의 User 클래스임에 주의
+		User principal = (User)authentication.getPrincipal(); // 커스텀 User 클래스가 아님에 주의
 		
 		return Jwts.builder()
 				.setSubject(principal.getUsername())
@@ -69,26 +75,16 @@ public class CustomAccessTokenProvider {
 				.compact();
 	}
 	
-    public boolean validateToken(String jwt) throws Exception {
-    	Jws<Claims> claims = parser()
-    			.setSigningKey(getPublickey())
-    			.parseClaimsJws(jwt);
-    	log.info("claims : {}", claims.toString());
-    	
-    	// jwt 서명이 일치하는지 확인한다. (jwt 조작 여부)
-    	String sign = jwt.split("\\.")[2];
-    	if ( !claims.getSignature().equals(sign) ) {
-    		log.info("jwt 서명 불일치");
-    		throw new Exception("jwt 서명이 일치하지 않습니다.");
-    	}
-    	
-    	// jwt의 만료 시간이 다 되었는지 확인한다.
-    	if ( claims.getBody().getExpiration().before(Date.from(Instant.now())) ) {
-    		log.info("jwt 만료");
-    		return false;
-    	}
-    	
-    	return true;
+    public boolean validateToken(String jwt) {
+		try {
+			parser().setSigningKey(getPublickey())
+				.parseClaimsJws(jwt);
+	    	return true;
+		} catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+			throw new BadCredentialsException("토큰의 인증 정보가 맞지 않습니다.", e);
+		} catch (ExpiredJwtException e) {
+			throw e; // Refresh Token 요청 작업 필요
+		}
     }
 
 	private PrivateKey getPrivateKey() {
@@ -104,7 +100,7 @@ public class CustomAccessTokenProvider {
     	try {
             return keyStore.getCertificate("springblog").getPublicKey();
         } catch (KeyStoreException e) {
-            throw new SpringRedditException("키 저장소에서 공개키를 가지고 오던 중 오류가 발생하였습니다.");
+            throw new SpringRedditException("공개키를 가지고 오던 중 오류가 발생하였습니다.");
         }
     }
 
@@ -113,7 +109,7 @@ public class CustomAccessTokenProvider {
                 .setSigningKey(getPublickey())
                 .parseClaimsJws(token)
                 .getBody();
-
+    	log.info("claims : {}", claims.toString());
         return claims.getSubject();
     }
     

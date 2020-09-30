@@ -16,15 +16,15 @@ import com.reddit.security.CustomAuthenticationProvider;
 import com.reddit.security.jwt.CustomJwtAuthenticationFilter;
 import com.reddit.security.oauth2.service.CustomOAuth2UserService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @EnableWebSecurity
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final CustomJwtAuthenticationFilter jwtAuthenticationFilter; // jwt 인증 필터
+    private final CustomJwtAuthenticationFilter jwtAuthenticationFilter; // 커스텀 JWT 인증 필터
     private final CustomAuthenticationProvider authProvider; // 커스텀 AuthenticationProvider
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2UserService customOAuth2UserService; // 커스텀 OAuth 처리
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
@@ -35,24 +35,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
     	httpSecurity
-    			.cors()
-    		.and()
+    		.cors()
+    			.and()
     			.csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
+    		.authorizeRequests()
+    			.antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/oauth2/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/posts/**").hasRole("USER")
-                .antMatchers(HttpMethod.GET, "/api/subreddit").permitAll()
                 .antMatchers("/v2/api-docs", "/configuration/ui",
                 		"/swagger-resources/**", "/configuration/security",
-                		"/swagger-ui.html", "/webjars/**").permitAll()
-                .anyRequest().authenticated() 
-            .and() // Oauth2 설정
-                .oauth2Login()
+                		"/swagger-ui.html", "/webjars/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "/api/posts/**").hasRole("USER")
+                .antMatchers(HttpMethod.GET, "/api/subreddit").hasRole("USER")
+            .anyRequest().authenticated()
+            	.and()
+            .oauth2Login()
                 .userInfoEndpoint()
                 	.userService(customOAuth2UserService);
     	
-    	// jwt 인증 필터를 security form 인증 필터 앞에 설정한다.
+    	// JWT 인증 필터를 Security form 인증 필터 앞에 둬서 전처리하게한다.
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
     

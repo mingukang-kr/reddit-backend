@@ -15,17 +15,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 	
 	private final CustomUserDetailsService customUserDetailsService;
 
 	@Override
 	public Authentication authenticate(Authentication needToBeAuthenticated) throws AuthenticationException {
-		// 인증이 필요한 Authentication 객체에 대한 유효성 검사를 if문들로 진행하고, username과 password를 받아온다.
 		if (needToBeAuthenticated == null) {
 			throw new InternalAuthenticationServiceException("인증 정보가 null값입니다.");
 		} 
@@ -36,7 +35,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		}
 		String password = needToBeAuthenticated.getCredentials().toString();
 		
-		// DB에서 유저 정보를 불러온다.
 		UserDetails loadedUser = customUserDetailsService.loadUserByUsername(username);
 		
 		if (loadedUser == null) {
@@ -51,6 +49,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		if (!loadedUser.isAccountNonExpired()) {
 			throw new AccountExpiredException("User account has expired");
 		}
+		// 비밀번호를 올바르게 입력했는지 확인
 		if (!new BCryptPasswordEncoder().matches(password, loadedUser.getPassword())) { 
 			throw new BadCredentialsException("Password does not match stored value"); 
 		}

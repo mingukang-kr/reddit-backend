@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.reddit.model.CacheKey;
 import com.reddit.model.User;
 import com.reddit.repository.UserRepository;
 
@@ -28,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	
     @Override
     @Transactional(readOnly = true)
-//    @Cacheable(value = "user", unless = "#result == null")
+    //@Cacheable(value = "user", unless = "#result == null")
     public UserDetails loadUserByUsername(String username) {
     	Optional<User> userOptional = userRepository.findByUsername(username);
         User user = userOptional
@@ -36,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         return new org.springframework.security.core.userdetails.User(
         		user.getUsername(), user.getPassword(),
-                user.isEnabled(), true, true, true, getAuthorities("ROLE_USER")); // 모든 회원은 가입시 기본적으로 유저의 권한을 부여.
+                user.isEnabled(), true, true, true, getAuthorities(user.getAuthority().toString()));
     }
     
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {

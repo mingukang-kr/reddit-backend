@@ -1,13 +1,13 @@
 package com.reddit.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -37,20 +37,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     	httpSecurity
     		.cors()
     			.and()
-    			.csrf().disable()
+    		.csrf().disable()
+    		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    			.and()
+    		/*
+    		 * permitAll() 은 인증 필요없이 요청이 가능한 것이고, authenticated()는 인증이 필요하다는 것이다. => 서로 다름을 명심!
+    		 */
     		.authorizeRequests()
     			.antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/oauth2/**").permitAll()
-                .antMatchers("/v2/api-docs", "/configuration/ui",
-                		"/swagger-resources/**", "/configuration/security",
-                		"/swagger-ui.html", "/webjars/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.GET, "/api/posts/**").hasRole("USER")
-                .antMatchers(HttpMethod.GET, "/api/subreddit").hasRole("USER")
+                .antMatchers("/api/posts/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers("/api/subreddit/**").hasAnyRole("ADMIN", "USER")
             .anyRequest().authenticated()
             	.and()
             .oauth2Login()
-                .userInfoEndpoint()
-                	.userService(customOAuth2UserService);
+                .userInfoEndpoint().userService(customOAuth2UserService);
     	
     	// JWT 인증 필터를 Security form 인증 필터 앞에 둬서 전처리하게한다.
     	httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

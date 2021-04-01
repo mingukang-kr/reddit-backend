@@ -12,7 +12,6 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -37,8 +36,7 @@ public class RedisConfig {
     public RedisCacheManager cacheManager() {
         RedisCacheConfiguration configuration = RedisCacheConfiguration
         		.defaultCacheConfig()
-        		.disableCachingNullValues() // null 캐시 방지
-//        		.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+        		.disableCachingNullValues() // null 캐싱 방지
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
         
         // cache-key 마다 지속 시간(TTL) 설정

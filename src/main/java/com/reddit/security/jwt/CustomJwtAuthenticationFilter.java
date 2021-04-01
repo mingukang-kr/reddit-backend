@@ -27,21 +27,18 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 	private final CustomAccessTokenProvider jwtProvider;
 	private final UserDetailsService userDetailsService;
 
-	// 로그인 후 서버 API를 요청할 때마다 JWT 인증 필터가 작동한다.
+	// 서버 API를 요청할 때마다 JWT 인증 필터가 작동한다.
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		String jwt = getJwtFromRequest(request);
-		log.info("jwt: {}", jwt);
-
 		/*
 		 * jwt가 1. 존재하고 2. 유효한 경우
 		 * 1. 존재하지 않으면? (ex. 최초 로그인) -> Security filter로 넘긴다.
-		 * 2. 유효하지 않으면? (validate()에서 예외 처리 한다.)
+		 * 2. 유효하지 않으면? (JWTProvider의 validate()에서 예외 처리 한다.)
 		 */
-		if (StringUtils.hasText(jwt)) {
+		if (StringUtils.hasText(jwt) && jwtProvider.validateToken(jwt)) {
 			String username = jwtProvider.getUsernameFromJWT(jwt);
-			
 			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
 					null, userDetails.getAuthorities());
@@ -53,7 +50,7 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	// 'Bearer '을 없애고 token만 추출하는 메소드
+	// Authorization 헤더에서 'Bearer '을 없애고 token만 추출하는 메소드
 	private String getJwtFromRequest(HttpServletRequest request) {
 		String bearerToken = request.getHeader("Authorization");
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {

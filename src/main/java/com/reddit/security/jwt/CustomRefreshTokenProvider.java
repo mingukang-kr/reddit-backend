@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.reddit.exception.SpringRedditException;
-import com.reddit.model.RefreshToken;
-import com.reddit.repository.RefreshTokenRepository;
+import com.reddit.auth.domain.RefreshToken;
+import com.reddit.auth.infra.RefreshTokenRepository;
+import com.reddit.common.exception.SpringRedditException;
 
 import lombok.AllArgsConstructor;
 

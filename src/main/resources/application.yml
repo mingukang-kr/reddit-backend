@@ -1,4 +1,5 @@
 spring:
+
 ### Database Properties
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,10 +13,12 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
+      
 ### Redis Properties
   redis:
     host: localhost
     port: 6379
+    
 ### Mail Properties
   mail:
     host: smtp.mailtrap.io
@@ -23,9 +26,11 @@ spring:
     username: a8d6266aacf5fe
     password: 8f65600dbe39c2
     protocol: smtp
-### other config
+    
   main:
     allow-bean-definition-overriding: true
+    
+### Security Properties
   security:
     oauth2:
       client:
@@ -34,6 +39,7 @@ spring:
             client-id: 607426288000-p316pclq9a2mpltvau3fv09tjs3ah4j4.apps.googleusercontent.com
             client-secret: OU-cn-p33vE5ppmZ_CqPhSbM
             scope: profile, email
+            
 ### JWT Properties
 jwt:
   expiration:

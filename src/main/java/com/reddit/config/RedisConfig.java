@@ -15,7 +15,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.reddit.model.CacheKey;
+import com.reddit.common.model.CacheKey;
 
 @Configuration
 @EnableCaching

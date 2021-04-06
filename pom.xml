@@ -105,12 +105,10 @@
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-stdlib-jdk8</artifactId>
-			<version>${kotlin.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-test</artifactId>
-			<version>${kotlin.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- add the thymeleaf dependency for sending emails -->
@@ -156,8 +154,6 @@
 			<artifactId>embedded-redis</artifactId>
 			<version>0.7.2</version>
 		</dependency>
-		
-		
 	</dependencies>
 
 	<build>

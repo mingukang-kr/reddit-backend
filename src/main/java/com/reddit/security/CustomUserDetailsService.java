@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.reddit.model.User;
-import com.reddit.repository.UserRepository;
+import com.reddit.auth.domain.User;
+import com.reddit.auth.infra.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

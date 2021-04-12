@@ -52,47 +52,42 @@ public class AuthService {
 	private final CustomAuthenticationProvider customAuthenticationProvider;
 	
 	@Transactional
-	public void signup(RegisterRequest registerRequest) {
-		// 1. 가입 신청한 회원의 정보를 DB에 저장 (메일 인증이 안 된 상태이므로 최종 가입이 된 것은 아님)
+	public String signup(RegisterRequest registerRequest) {
+		// 1. 가입 신청한 회원의 정보를 DB에 저장
 		User user = new User();
 		user.setUsername(registerRequest.getUsername());
 		user.setEmail(registerRequest.getEmail());
 		user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 		user.setCreated(now());
 		user.setEnabled(false); // 메일 인증을 통해 최종 회원 가입이 될 시에 true로 바꿔준다.
+		
 		userRepository.save(user);
+		
 		log.info("가입 신청 회원의 정보가 DB에 저장되었습니다.");
 
-		// 2. 회원 가입 완료를 위해 가입 인증 메일을 보냄
+		// 2. 가입 완료를 위해 인증 메일 전송
 		String token = generateVerificationToken(user);
-		String message = mailContentBuilder.build("가입 확인 인증 메일입니다. 링크를 클릭하시면 회원 가입이 완료됩니다. : " 
-				+ ACTIVATION_EMAIL + "/" + token); // 컨트롤러의 요청 매핑 주소에 토큰을 붙여서 메일을 보낸다.
+		String message = mailContentBuilder.build("가입 인증 메일입니다. 링크를 클릭하시면 회원 가입이 완료됩니다. " 
+				+ ACTIVATION_EMAIL + "/" + token);
 		mailService.sendMail(new NotificationEmail("가입을 완료하시려면 클릭하세요.", user.getEmail(), message));
+		
+		return token;
 	}
 	
 	public AuthenticationResponse login(LoginRequest loginRequest) {
-	/* 1. 스프링 시큐리티 */
-		/* 1. 로그인 인증 필터로 입력한 아이디와 비밀번호가 들어간 토큰을 만든다. */
+		// spring security
 		Authentication needToBeAuthenticated = customUsernamePasswordAuthenticationFilter.AttemptAuthentication(loginRequest);
-		
-		/* 2. AuthenticationProvider에서 인증을 진행하고, 인증이 완료되면 Authentication 객체를 반환한다.
-		 * ProviderManager -> 해당 토큰을 인증할 AuthencationProvider를 찾는다.
-		 * 직접 구현한 AuthenticationProvider에서 인증을 진행한다.
-		 * */
 		Authentication authenticated = customAuthenticationProvider.authenticate(needToBeAuthenticated);
-		
-		// 3. 인증 완료된 Authentication 객체를 Security 컨텍스트에 저장한다.
 		SecurityContextHolder.getContext().setAuthentication(authenticated);
 		
-	/* 2. JWT를 이용한 인증 시스템 */
-		// 1. Authentication 객체에 인증서로 서명하여 인증 토큰(엑세스 토큰)을 만든다.
+		// jwt
 		String accessToken = jwtProvider.generateToken(authenticated);
+		String refreshToken = refreshTokenProvider.generateRefreshToken().getToken();
 
-		// 2. 응답 객체에 각종 데이터(Access 토큰, Refresh 토큰 등)를 넣은 뒤 반환한다.
 		return AuthenticationResponse.builder()
 				.authenticationToken(accessToken)
-				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis())) // Access
-				.refreshToken(refreshTokenProvider.generateRefreshToken().getToken())
+				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+				.refreshToken(refreshToken)
 				.username(loginRequest.getUsername())
 				.build();
 	}
@@ -109,7 +104,7 @@ public class AuthService {
 	// 인증 토큰 생성 메소드
 	private String generateVerificationToken(User user) {
 		String token = UUID.randomUUID().toString();
-		
+				
 		VerificationToken verificationToken = new VerificationToken();
 		verificationToken.setToken(token);
 		verificationToken.setUser(user);
@@ -120,23 +115,26 @@ public class AuthService {
 	}
 
 	// 가입 확인 메일을 눌러서 돌아온 토큰이 유효한 토큰인지 검사하는 메소드
-	public void verifyAccount(String token) {
+	public Long verifyAccount(String token) {
 		Optional<VerificationToken> verificationTokenOptional = verificationTokenRepository.findByToken(token);
 		verificationTokenOptional
 			.orElseThrow(() -> new SpringRedditException("인증 정보가 올바르지 않습니다."));
 		
-		fetchUserAndEnable(verificationTokenOptional.get());
+		return fetchUserAndEnable(verificationTokenOptional.get());
 	}
 
 	// 인증된 토큰으로부터 사용자 정보를 DB에서 불러오는 메소드
 	@Transactional
-	private void fetchUserAndEnable(VerificationToken verificationToken) {
+	private Long fetchUserAndEnable(VerificationToken verificationToken) {
 		User user = verificationToken.getUser();
 		user.setEnabled(true); // 가입 인증을 완료하면 true로 바꿔준다.
-		user.setAuthority(Authority.ROLE_USER); // 처음 가입시 권한은 'ROLE_USER'이다.
+		user.setAuthority(Authority.ROLE_USER);
 
-		userRepository.save(user); // 다시 새로 회원정보가 처음부터 저장되는 것이 아니라, enabled만 바뀌어서 DB에도 적용된다.
-		log.info("회원 가입이 최종적으로 완료되었습니다.");
+		User userSignCompleted = userRepository.save(user);
+		
+		log.info("회원 가입이 완료되었습니다.");
+		
+		return userSignCompleted.getUserId();
 	}
 	
     public boolean isLoggedIn() {

@@ -15,10 +15,11 @@ public class CustomUsernamePasswordAuthenticationFilter {
 		String password = req.getPassword();
 		
 		if (username == null) {
-			throw new NullPointerException("id가 null입니다.");
+			throw new NullPointerException("id를 입력해주세요.");
 		}
+		
 		if (password == null) {
-			throw new NullPointerException("password가 null입니다.");
+			throw new NullPointerException("password를 입력해주세요.");
 		}
 		
 		return new UsernamePasswordAuthenticationToken(username, password);
